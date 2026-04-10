@@ -11,6 +11,8 @@ from jarvis.system.screen import ScreenAwarenessLayer
 from jarvis.interface.voice import VoiceEngine, Priority
 from jarvis.interface.overlay import OverlayEngine
 from jarvis.interface.listener import WakeWordEngine
+from jarvis.engine.tool_router import ToolRouter
+from jarvis.plugins.tool_manager import ToolManager
 
 
 class JarvisRuntime:
@@ -24,6 +26,11 @@ class JarvisRuntime:
         self.voice = VoiceEngine() # Phase 8: Voice Output
         self.overlay = OverlayEngine() # Phase 8: Visual HUD
         self.listener = WakeWordEngine(self._wake_trigger) # Phase 9: Sentient Presence
+        
+        # Tool Orchestration (Phase 10 Extension)
+        self.tool_router = ToolRouter()
+        self.tool_manager = ToolManager()
+        
         self.running = False
         self.is_executing = False # Interrupt Safety Lock
         
@@ -151,7 +158,33 @@ class JarvisRuntime:
         except Exception as e:
             print(f"[Jarvis Behavior] Warning: Behavioral prediction skewed: {e}")
 
-        # 1. Gather System Context
+        # 1. ORCHESTRATOR ROUTING (Phase 10 Extension)
+        route_decision = self.tool_router.route(user_intent)
+        tool = route_decision["tool"]
+        
+        if tool != "system":
+            print(f"\n[Jarvis Orchestrator] Intent routed to specialist tool: {tool}")
+            print(f"                      Reason: {route_decision['reason']}")
+            
+            if not self.tool_manager.is_installed(tool):
+                print(f"[Jarvis Orchestrator] Module '{tool}' is not installed.")
+                self.voice.speak("Tool not installed.")
+                self.overlay.show_status("Missing Tool", f"Install {tool} to proceed.", "critical")
+                
+                # We do not crash, we fallback to our native pipeline or ask to install
+                print(f"                      Falling back to Local System OS Execution...\n")
+            else:
+                self.voice.speak("Delegating.", priority=Priority.ASSIST)
+                # Yield control to the external tool
+                if tool == "claude_code":
+                    self.tool_manager.execute_claude_code(user_intent, self.overlay.show_status)
+                elif tool == "openclaw":
+                    self.tool_manager.execute_openclaw(user_intent, self.overlay.show_status)
+                    
+                # A specialized tool completed the intent. We are done.
+                return
+
+        # 2. Gather System Context (Fallback to Native OS Execution)
         try:
             os_context = get_system_state()
         except Exception as e:
@@ -159,7 +192,7 @@ class JarvisRuntime:
             self._register_error()
             return
             
-        # 2. Extract Phase 5 Semantic / Historical Context
+        # 3. Extract Phase 5 Semantic / Historical Context
         enriched_intent = self.context_layer.enrich(user_intent)
         
         # 3. Feed into AI Engine
