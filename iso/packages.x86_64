@@ -1,0 +1,60 @@
+# Base system
+base
+linux
+linux-firmware
+intel-ucode
+amd-ucode
+
+# Networking
+networkmanager
+nm-applet
+
+# Utility & Installer Needs
+git
+wget
+curl
+vim
+nano
+sudo
+parted
+dosfstools
+e2fsprogs
+squashfs-tools
+arch-install-scripts
+
+# Desktop / Wayland (The Body)
+hyprland
+xdg-desktop-portal-hyprland
+kitty
+waybar
+wofi
+polkit-kde-agent
+mako
+hyprpaper
+grim
+slurp
+wl-clipboard
+
+# Audio system
+pipewire
+pipewire-pulse
+pipewire-alsa
+pipewire-jack
+wireplumber
+
+# Hardware integrations
+bluez
+bluez-utils
+brightnessctl
+
+# User Apps (To test Jarvis OS functionality)
+firefox
+thunar
+
+# Jarvis Engine Requirements
+python
+python-pip
+espeak-ng
+libnotify
+
+# We install Ollama, Vosk, Sounddevice via pip/script during firstboot or install.

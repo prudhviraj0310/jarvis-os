@@ -1,0 +1,21 @@
+[Unit]
+Description=Jarvis OS Core Runtime
+Documentation=https://github.com/your-repo/jarvis
+After=network.target
+
+[Service]
+Type=simple
+# Ensure we launch Jarvis in daemon mode
+ExecStart=/usr/bin/env python3 -m jarvis --mode daemon
+# Using %h to dynamically map to the user's home directory
+WorkingDirectory=%h/Downloads/jarvis os for linux
+# Auto-restart if the AI runtime crashes
+Restart=always
+RestartSec=5
+
+# Set any necessary environment variables for the daemon here
+# Environment="OLLAMA_HOST=http://127.0.0.1:11434"
+
+[Install]
+# Bind to the default user target so it starts on login
+WantedBy=default.target

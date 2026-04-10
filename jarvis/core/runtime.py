@@ -1,0 +1,303 @@
+import time
+import json
+
+from jarvis.engine.llm import OllamaEngine, EngineTimeoutError, EngineValidationError
+from jarvis.engine.context import ContextEngine
+from jarvis.engine.behavior import BehavioralEngine
+from jarvis.system.kernel import get_system_state
+from jarvis.system.execution import ExecutionPolicy, RiskLevel, execute_command
+from jarvis.system.input_control import InputControlLayer
+from jarvis.system.screen import ScreenAwarenessLayer
+from jarvis.interface.voice import VoiceEngine, Priority
+from jarvis.interface.overlay import OverlayEngine
+from jarvis.interface.listener import WakeWordEngine
+
+
+class JarvisRuntime:
+    def __init__(self, mode="interactive"):
+        self.mode = mode
+        self.engine = OllamaEngine()
+        self.context_layer = ContextEngine() # Phase 5: Memory Interceptor
+        self.behavior_layer = BehavioralEngine() # Phase 6: Prediction Interceptor
+        self.screen_layer = ScreenAwarenessLayer() # Phase 4 Vision Hooks
+        self.input_layer = InputControlLayer()
+        self.voice = VoiceEngine() # Phase 8: Voice Output
+        self.overlay = OverlayEngine() # Phase 8: Visual HUD
+        self.listener = WakeWordEngine(self._wake_trigger) # Phase 9: Sentient Presence
+        self.running = False
+        self.is_executing = False # Interrupt Safety Lock
+        
+        # Resilience Layer
+        self.safe_mode = False
+        self.consecutive_errors = 0
+        self.MAX_ERRORS = 3
+
+    def start(self):
+        self.running = True
+        print(f"[Jarvis Runtime] Started in {self.mode} mode.")
+        if self.mode == "daemon":
+            self.listener.start()
+        
+        # Boot Feedback
+        self.voice.play_cue("listening")
+        self.voice.speak("Online.", priority=Priority.CRITICAL)
+        self.overlay.show_status("Boot Sequence", "System Online.", "normal")
+        
+        while self.running:
+            try:
+                if self.mode == "interactive":
+                    user_intent = input("\n[Jarvis] Ready > ").strip()
+                    if not user_intent:
+                        continue
+                    if user_intent.lower() in ["exit", "quit", "stop"]:
+                        self.stop()
+                        break
+                    
+                    self._process_intent(user_intent)
+                else:
+                    # Daemon mode loop stub
+                    time.sleep(1)
+            except Exception as e:
+                # Catch ALL top-level errors to prevent loop crash
+                print(f"[Jarvis ERROR] Unhandled framework exception: {e}")
+                self._register_error()
+
+    def _wake_trigger(self, intent: str):
+        """Asynchronous callback fired by WakeWordEngine"""
+        
+        # 3. INTERRUPT SAFETY: Drop wake requests if system is actively executing
+        if self.is_executing:
+            print(f"[Jarvis Wake] Dropped interrupt '{intent}' - pipeline is active.")
+            return
+
+        # 2. LISTENING STATE FEEDBACK
+        print(f"\n[Jarvis Wake Triggered] Command: '{intent}'")
+        self.voice.play_cue("listening")
+        self.overlay.show_status("Active Listening", f"I heard: {intent}", "normal")
+        
+        if intent.lower() == "System Wake":
+            self.voice.speak("Ready.", priority=Priority.ASSIST)
+            return
+            
+        # Push into reasoning loop
+        self._process_intent(intent)
+
+    def stop(self):
+        self.running = False
+        self.listener.stop()
+        print("[Jarvis Runtime] Shutting down.")
+        self.voice.speak("Offline.", priority=Priority.CRITICAL)
+        self.overlay.show_status("System Offline", "Shutting down.", "normal")
+
+    def _register_error(self):
+        self.consecutive_errors += 1
+        if self.consecutive_errors >= self.MAX_ERRORS and not self.safe_mode:
+            self.safe_mode = True
+            print(f"\n[CRITICAL WARNING] Consecutive error limit reached ({self.consecutive_errors}).")
+            print("[CRITICAL WARNING] Jarvis Engine entering SAFE MODE. Auto-execution is suspended.")
+            self.voice.play_cue("error")
+            self.voice.speak("Safe mode active.", priority=Priority.CRITICAL)
+            self.overlay.show_status("Safe Mode Activated", "Consecutive errors breached limit.", "critical")
+
+    def _clear_errors(self):
+        if self.safe_mode:
+            print("\n[Jarvis] System stable. SAFE MODE deactivated.")
+            self.voice.speak("Restored.", priority=Priority.ASSIST)
+            self.overlay.show_status("System Stable", "Safe mode deactivated.", "normal")
+        self.consecutive_errors = 0
+        self.safe_mode = False
+
+    def _verify_visual_context(self, expected_process: str) -> bool:
+        if not expected_process:
+            return True # Nothing to verify
+            
+        print(f"[Jarvis] Active perception polling: Looking for '{expected_process}' window...")
+        
+        for _ in range(10):
+            if self.screen_layer.verify_context(expected_process):
+                print(f"         Context visually confirmed: '{expected_process}' dominates focus.")
+                return True
+            time.sleep(0.5)
+            
+        return False
+
+    def _process_intent(self, user_intent: str):
+        self.is_executing = True
+        try:
+            self._process_intent_core(user_intent)
+        finally:
+            self.is_executing = False
+
+    def _process_intent_core(self, user_intent: str):
+        # 0. Phase 6 Prediction Engine Interceptor 
+        try:
+            workflows = self.context_layer.mempalace.get_all_workflows()
+            behavior_eval = self.behavior_layer.predict_next_action(user_intent, workflows)
+            
+            if behavior_eval["should_suggest"]:
+                self.voice.play_cue("listening")
+                self.voice.speak("Pattern found. Execute?", priority=Priority.ASSIST)
+                self.overlay.show_status("Prediction Active", "Awaiting confirmation.", "normal")
+                
+                print(f"[Jarvis Behavior] High probability pattern detected (Confidence: {behavior_eval['confidence']})")
+                print(f"                  Predicted Sequence Summary: {json.dumps(behavior_eval['prediction'])[:100]}...")
+                confirm = input(f"                  Would you like to auto-chain this sequence? [y/N]: ").strip().lower()
+                if confirm == 'y':
+                    print("[Jarvis] Auto-chaining predicted workflow bypassing LLM generation.")
+                    self.voice.speak("Proceeding.", priority=Priority.ASSIST)
+                    # Fast-path Execution (Skipping LLM parsing entirely)
+                    self._route_pipeline(behavior_eval["prediction"], user_intent)
+                    return
+        except Exception as e:
+            print(f"[Jarvis Behavior] Warning: Behavioral prediction skewed: {e}")
+
+        # 1. Gather System Context
+        try:
+            os_context = get_system_state()
+        except Exception as e:
+            print(f"[Jarvis] Failed to retrieve system state: {e}")
+            self._register_error()
+            return
+            
+        # 2. Extract Phase 5 Semantic / Historical Context
+        enriched_intent = self.context_layer.enrich(user_intent)
+        
+        # 3. Feed into AI Engine
+        print("[Jarvis] Reasoning...")
+        try:
+            decision = self.engine.evaluate_intent(os_context, enriched_intent)
+            self._clear_errors() # Clear errors on successful reasoning
+        except EngineTimeoutError as e:
+            print(f"[Jarvis ERROR] Engine Timeout: {e}")
+            self._register_error()
+            return
+        except EngineValidationError as e:
+            print(f"[Jarvis ERROR] Engine Validation Failure: {e}")
+            self._register_error()
+            return
+        except Exception as e:
+            print(f"[Jarvis ERROR] Unknown Engine Failure: {e}")
+            self._register_error()
+            return
+        
+        # 4. Process Validated Action Sequence (Atomicity)
+        confidence = decision.get("confidence", 0.0)
+        action_sequence = decision.get("action_sequence", [])
+        response_msg = decision.get("response", "No response generated.")
+        
+        print(f"[Jarvis] Output: {response_msg}")
+        
+        if not action_sequence:
+            self.voice.speak("Completed.", priority=Priority.ROUTINE)
+            self.overlay.show_status("Response", response_msg, "normal")
+            return
+            
+        if confidence < 0.7:
+            print(f"[Jarvis] Confidence threshold failed at {confidence}. Aborting.")
+            self.voice.play_cue("error")
+            self.voice.speak("Aborted. Low confidence.", priority=Priority.ASSIST)
+            self.overlay.show_status("Aborted", "Decision confidence too low.", "normal")
+            return
+
+        # 5. Enforce Safe Mode Boundary
+        if self.safe_mode:
+            print("[Jarvis SAFE MODE] Auto-execution globally suspended.")
+            self.voice.speak("Safe mode override required.")
+            confirm = input(f"Manual override! Execute {len(action_sequence)} actions? [y/N]: ").strip().lower()
+            if confirm != 'y':
+                print("[Jarvis] Sequence aborted.")
+                return
+
+        # Let user know what we are doing visually
+        self.overlay.show_status("Executing", "Running instruction sequence...", "normal")
+        self.voice.speak("Executing.", priority=Priority.ROUTINE)
+
+        # 6. Route Action Pipeline Sequentially
+        self._route_pipeline(action_sequence, user_intent)
+        
+    def _route_pipeline(self, action_sequence: list, trigger_intent: str):
+        success_flag = True
+        for idx, item in enumerate(action_sequence):
+            action_type = item.get("type")
+            
+            print(f"         [Pipeline {idx+1}/{len(action_sequence)}] Executing {action_type} action...")
+            
+            if action_type == "system":
+                success = self._handle_system_action(item)
+                if not success:
+                    print(f"         [Pipeline ERROR] System action failed/rejected. Aborting remainder of sequence.")
+                    success_flag = False
+                    break
+            elif action_type == "input":
+                success = self._handle_input_action(item)
+                if not success:
+                    print(f"         [Pipeline ERROR] Input action blocked. Aborting remainder of sequence.")
+                    success_flag = False
+                    break
+        
+        # 7. Commit successful workflow sequence back to L1/L3 memory
+        if success_flag and action_sequence:
+            self.voice.play_cue("success")
+            self.voice.speak("Done.", priority=Priority.ROUTINE)
+            self.context_layer.record_success(trigger_intent, action_sequence)
+
+
+    def _handle_system_action(self, item: dict) -> bool:
+        action = item.get("payload", "")
+        expected = item.get("expected_process", "")
+        
+        risk = ExecutionPolicy.evaluate(action)
+        
+        if risk == RiskLevel.CRITICAL:
+            print(f"[Jarvis] Action '{action}' blocked. Evaluated as CRITICAL risk.")
+            self.voice.play_cue("error")
+            self.voice.speak("Critical override required.", priority=Priority.CRITICAL)
+            self.overlay.show_status("Warning", f"Critical command blocked: {action}", "critical")
+            confirm = input(f"CRITICAL OVERRIDE! Execute {action}? [y/N]: ").strip().lower()
+            if confirm != 'y':
+                return False
+        elif risk == RiskLevel.MODERATE:
+            print(f"[Jarvis] WARNING: Action '{action}' evaluated as MODERATE risk.")
+            confirm = input(f"Execute {action}? [y/N]: ").strip().lower()
+            if confirm != 'y':
+                return False
+                
+        print(f"[Jarvis] Executing System Command: {action}")
+        result = execute_command(action)
+        if result["status"] == "success":
+            print(f"[Jarvis] Success. stdout:\n{result['stdout']}")
+        else:
+            print(f"[Jarvis] Command Failed (Code {result.get('code', -1)}). stderr:\n{result['stderr']}")
+            return False
+            
+        # Core Phase 4 Perception Loop Block
+        if expected:
+            # We don't ask the OS if the process is running. We ask the Screen if the window is alive.
+            if not self._verify_visual_context(expected):
+                print(f"[Jarvis SAFETY TRIGGER] Expected '{expected}' to take compositor focus, but it did not spawn visually. Blocking remainder of Pipeline.")
+                self.voice.speak("Wayland context verification failed.")
+                self.overlay.show_status("Error", "Context verification failed.", "critical")
+                self._register_error()
+                return False # Clean abort
+        else:
+            time.sleep(1)
+            
+        return True
+
+    def _handle_input_action(self, item: dict) -> bool:
+        print(f"[Jarvis] Actuating Physical Input: {item}")
+        
+        try:
+            result = self.input_layer.execute_input_action(item)
+            if result.get("status") == "error":
+                print(f"[Jarvis ERROR] Physical Actuation Blocked: {result.get('error')}")
+                self._register_error()
+                return False
+            else:
+                print(f"[Jarvis] Actuation complete.")
+                time.sleep(0.5)
+                return True
+        except Exception as e:
+            print(f"[Jarvis ERROR] Input Layer System Crash: {e}")
+            self._register_error()
+            return False

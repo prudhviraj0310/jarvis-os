@@ -1,0 +1,19 @@
+[Unit]
+Description=Jarvis OS AI-Native Interactive Daemon
+After=network.target graphical-session.target
+Wants=ollama.service
+
+[Service]
+Type=simple
+Environment="PULSE_SERVER=unix:/run/user/1000/pulse/native"
+Environment="WAYLAND_DISPLAY=wayland-1"
+Environment="XDG_RUNTIME_DIR=/run/user/1000"
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/usr/bin/python3 -m jarvis --mode daemon
+WorkingDirectory=/opt/jarvis
+Restart=always
+RestartSec=2
+StartLimitInterval=0
+
+[Install]
+WantedBy=default.target
