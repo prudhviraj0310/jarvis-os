@@ -218,6 +218,10 @@ class JarvisRuntime:
                         success = self.tool_manager.execute_claude_code(task, self.overlay.show_status)
                     elif tool == "openclaw":
                         success = self.tool_manager.execute_openclaw(task, self.overlay.show_status)
+                    elif tool == "aider":
+                        success = self.tool_manager.execute_aider(task, self.overlay.show_status)
+                    elif tool == "n8n":
+                        success = self.tool_manager.execute_n8n(task, self.overlay.show_status)
                         
                     if not success:
                         print(f"[Jarvis Orchestrator] Agent {tool} reported failure. Pipeline halted.")

@@ -9,12 +9,16 @@ class ToolRouter:
         # For a full implementation, you could use a fast classifier LLM here.
         self.routes = {
             "claude_code": [
-                "build", "code", "write", "debug", "refactor", "app", 
-                "website", "script", "program", "function", "compile"
+                "design app", "build architecture", "complex project", "website prototype"
+            ],
+            "aider": [
+                "edit file", "fix bug", "refactor test", "inline edit", "terminal code"
             ],
             "openclaw": [
-                "automate", "workflow", "crawl", "scrape", "repetitive", 
-                "monitor", "organize documents", "background task"
+                "crawl", "scrape", "repetitive", "organize documents", "background task"
+            ],
+            "n8n": [
+                "api pipeline", "visual workflow", "connect services", "email trigger automation"
             ]
         }
 
@@ -33,24 +37,27 @@ class ToolRouter:
             pipeline.append({"tool": "openclaw", "task": "Execute the newly created scraper and verify outputs"})
             return pipeline
             
-        # 2. Check for coding tasks
+        # 2. Check for Heavy Architecture Tasks (Claude)
         if any(keyword in intent_lower for keyword in self.routes["claude_code"]):
-            if "code" in intent_lower or "app" in intent_lower or "script" in intent_lower or "website" in intent_lower or "debug" in intent_lower:
-                pipeline.append({
-                    "tool": "claude_code",
-                    "task": intent
-                })
-                return pipeline
-
-        # 3. Check for automation/agent tasks
-        if any(keyword in intent_lower for keyword in self.routes["openclaw"]):
-            pipeline.append({
-                "tool": "openclaw",
-                "task": intent
-            })
+            pipeline.append({"tool": "claude_code", "task": intent})
             return pipeline
 
-        # 4. Default to the fast Local LLM (System Control Layer)
+        # 3. Check for Fast Terminal Coding Tasks (Aider)
+        if any(keyword in intent_lower for keyword in self.routes["aider"]):
+            pipeline.append({"tool": "aider", "task": intent})
+            return pipeline
+
+        # 4. Check for Headless Automation (OpenClaw)
+        if any(keyword in intent_lower for keyword in self.routes["openclaw"]):
+            pipeline.append({"tool": "openclaw", "task": intent})
+            return pipeline
+
+        # 5. Check for Visual API Workflows (n8n)
+        if any(keyword in intent_lower for keyword in self.routes["n8n"]):
+            pipeline.append({"tool": "n8n", "task": intent})
+            return pipeline
+
+        # 6. Default to the fast Local LLM (System Control Layer)
         pipeline.append({
             "tool": "system",
             "task": intent
