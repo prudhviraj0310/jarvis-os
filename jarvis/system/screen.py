@@ -2,6 +2,9 @@ import subprocess
 import os
 import time
 import json
+import base64
+import urllib.request
+import urllib.error
 
 class ScreenAwarenessLayer:
     def __init__(self, capture_dir="/tmp/jarvis_vision"):
@@ -26,6 +29,43 @@ class ScreenAwarenessLayer:
             return filepath
         except Exception:
             return ""
+
+    def analyze_screen(self, prompt: str = "Describe what is on this screen briefly. If there is an error, read it.") -> str:
+        """
+        True Pixel Vision Integration (Llava).
+        Captures the screen and uses a Vision Language Model to read and interpret it.
+        """
+        capture_path = self.capture_screen()
+        if not capture_path:
+            return "Vision Error: Could not capture screen."
+            
+        try:
+            with open(capture_path, "rb") as img_file:
+                b64_image = base64.b64encode(img_file.read()).decode('utf-8')
+                
+            payload = {
+                "model": "llava",
+                "prompt": prompt,
+                "images": [b64_image],
+                "stream": False
+            }
+            
+            req = urllib.request.Request(
+                "http://localhost:11434/api/generate", 
+                data=json.dumps(payload).encode('utf-8'),
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            with urllib.request.urlopen(req, timeout=30) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                return result.get("response", "Vision context unreadable.")
+                
+        except urllib.error.URLError:
+            return "Vision System Offline: Is Ollama running? Do you have Llava installed?"
+        except Exception as e:
+            return f"Vision System Error: {e}"
+        finally:
+            if os.path.exists(capture_path): pass # Keep captures for reflex storage or delete based on config
 
     def get_screen_state(self) -> dict:
         """

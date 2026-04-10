@@ -1,5 +1,6 @@
 import time
 import json
+import threading
 
 from jarvis.engine.llm import OllamaEngine, EngineTimeoutError, EngineValidationError
 from jarvis.engine.context import ContextEngine
@@ -34,6 +35,9 @@ class JarvisRuntime:
         self.running = False
         self.is_executing = False # Interrupt Safety Lock
         
+        # V2: Proactive Intelligence Loop
+        self.autonomous_thread = threading.Thread(target=self._run_autonomous_loop, daemon=True)
+        
         # Resilience Layer
         self.safe_mode = False
         self.consecutive_errors = 0
@@ -42,6 +46,10 @@ class JarvisRuntime:
     def start(self):
         self.running = True
         print(f"[Jarvis Runtime] Started in {self.mode} mode.")
+        
+        # Start Autonomous Loop
+        self.autonomous_thread.start()
+        
         if self.mode == "daemon":
             self.listener.start()
         
@@ -69,6 +77,31 @@ class JarvisRuntime:
                 print(f"[Jarvis ERROR] Unhandled framework exception: {e}")
                 self._register_error()
 
+    def _run_autonomous_loop(self):
+        """
+        V2 Autonomous Prediction Engine.
+        Runs constantly in the background, checking OS state.
+        If a prediction hits the 90% AUTO_EXEC threshold, Jarvis executes it before the user asks.
+        """
+        while True:
+            try:
+                time.sleep(60) # Poll every 60 seconds
+                if not self.running or self.is_executing:
+                    continue
+                    
+                # We generate a passive pseudo-intent based on OS state. In real prod, this is tied to triggers.
+                # For Phase 11, we pass an empty "system_tick" intent to evaluate the time/date states.
+                workflows = self.context_layer.mempalace.get_all_workflows()
+                behavior_eval = self.behavior_layer.predict_next_action("system_tick", workflows)
+                
+                if behavior_eval.get("should_auto_exec", False):
+                    print(f"\n[Jarvis Autonomous] High probability workflow detected (>90%). Executing proactively.")
+                    self.voice.speak("Proactive execution initiated.", priority=Priority.ASSIST)
+                    self.overlay.show_status("Autonomous Engine", "Predictive sequence initiated.", "normal")
+                    self._process_intent("system_tick") # Push it through the pipeline
+            except Exception:
+                pass # Fail silently in background to avoid disrupting UX
+                
     def _wake_trigger(self, intent: str):
         """Asynchronous callback fired by WakeWordEngine"""
         
@@ -158,31 +191,41 @@ class JarvisRuntime:
         except Exception as e:
             print(f"[Jarvis Behavior] Warning: Behavioral prediction skewed: {e}")
 
-        # 1. ORCHESTRATOR ROUTING (Phase 10 Extension)
-        route_decision = self.tool_router.route(user_intent)
-        tool = route_decision["tool"]
+        # 1. ORCHESTRATOR ROUTING (Phase 10 Extension: Multi-Agent DAGs)
+        # We now support pipelines: chaining external agents before yielding or continuing
+        pipeline = self.tool_router.route(user_intent)
         
-        if tool != "system":
-            print(f"\n[Jarvis Orchestrator] Intent routed to specialist tool: {tool}")
-            print(f"                      Reason: {route_decision['reason']}")
+        external_agents_handled = False
+        
+        for agent_node in pipeline:
+            tool = agent_node["tool"]
+            task = agent_node["task"]
             
-            if not self.tool_manager.is_installed(tool):
-                print(f"[Jarvis Orchestrator] Module '{tool}' is not installed.")
-                self.voice.speak("Tool not installed.")
-                self.overlay.show_status("Missing Tool", f"Install {tool} to proceed.", "critical")
+            if tool != "system":
+                external_agents_handled = True
+                print(f"\n[Jarvis Orchestrator] Delegating task to {tool}: '{task}'")
                 
-                # We do not crash, we fallback to our native pipeline or ask to install
-                print(f"                      Falling back to Local System OS Execution...\n")
-            else:
-                self.voice.speak("Delegating.", priority=Priority.ASSIST)
-                # Yield control to the external tool
-                if tool == "claude_code":
-                    self.tool_manager.execute_claude_code(user_intent, self.overlay.show_status)
-                elif tool == "openclaw":
-                    self.tool_manager.execute_openclaw(user_intent, self.overlay.show_status)
-                    
-                # A specialized tool completed the intent. We are done.
-                return
+                if not self.tool_manager.is_installed(tool):
+                    print(f"[Jarvis Orchestrator] Module '{tool}' is not installed.")
+                    self.voice.speak("Tool not installed.")
+                    self.overlay.show_status("Missing Tool", f"Install {tool} to proceed.", "critical")
+                    print(f"                      Falling back to Local System OS Execution...\n")
+                    external_agents_handled = False # Fall back completely
+                    break
+                else:
+                    self.voice.speak(f"Delegating to {tool}.", priority=Priority.ASSIST)
+                    if tool == "claude_code":
+                        success = self.tool_manager.execute_claude_code(task, self.overlay.show_status)
+                    elif tool == "openclaw":
+                        success = self.tool_manager.execute_openclaw(task, self.overlay.show_status)
+                        
+                    if not success:
+                        print(f"[Jarvis Orchestrator] Agent {tool} reported failure. Pipeline halted.")
+                        break
+
+        # If a specialized DAG pipeline entirely handled the intent, we terminate the loop successfully.
+        if external_agents_handled:
+            return
 
         # 2. Gather System Context (Fallback to Native OS Execution)
         try:

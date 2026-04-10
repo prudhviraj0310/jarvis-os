@@ -18,31 +18,41 @@ class ToolRouter:
             ]
         }
 
-    def route(self, intent: str) -> dict:
+    def route(self, intent: str) -> list:
         """
-        Determines the appropriate agent for the user's intent.
-        Returns a dict: {"tool": "claude_code|openclaw|system", "reason": "..."}
+        Determines the appropriate agent DAG (pipeline) for the user's intent.
+        Returns a list of dicts: [{"tool": "claude_code|openclaw|system", "task": "..."}]
         """
         intent_lower = intent.lower()
+        pipeline = []
         
-        # 1. Check for coding tasks
+        # 1. Multi-Agent DAG Check
+        # If the intent requires designing and running, chain them.
+        if "build" in intent_lower and "scraper" in intent_lower:
+            pipeline.append({"tool": "claude_code", "task": f"Write the python code for: {intent}"})
+            pipeline.append({"tool": "openclaw", "task": "Execute the newly created scraper and verify outputs"})
+            return pipeline
+            
+        # 2. Check for coding tasks
         if any(keyword in intent_lower for keyword in self.routes["claude_code"]):
-            # Prevent false positives like "build a habit"
             if "code" in intent_lower or "app" in intent_lower or "script" in intent_lower or "website" in intent_lower or "debug" in intent_lower:
-                return {
+                pipeline.append({
                     "tool": "claude_code",
-                    "reason": "semantic match for complex software engineering task"
-                }
+                    "task": intent
+                })
+                return pipeline
 
-        # 2. Check for automation/agent tasks
+        # 3. Check for automation/agent tasks
         if any(keyword in intent_lower for keyword in self.routes["openclaw"]):
-            return {
+            pipeline.append({
                 "tool": "openclaw",
-                "reason": "semantic match for autonomous workflow execution"
-            }
+                "task": intent
+            })
+            return pipeline
 
-        # 3. Default to the fast Local LLM (System Control Layer)
-        return {
+        # 4. Default to the fast Local LLM (System Control Layer)
+        pipeline.append({
             "tool": "system",
-            "reason": "default OS execution pipeline"
-        }
+            "task": intent
+        })
+        return pipeline
