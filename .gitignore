@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+.DS_Store
+out/
+/tmp/jarvis*
+*.egg-info/
+dist/
+build/
+linux/
