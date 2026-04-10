@@ -10,47 +10,72 @@ class BehavioralEngine:
         self.SUGGESTION_THRESHOLD = 0.75
         self.AUTO_EXEC_THRESHOLD = 0.90 # Kept for future autonomous phases
 
+    def _get_time_of_day(self) -> str:
+        hour = time.localtime().tm_hour
+        if 5 <= hour < 12: return "morning"
+        elif 12 <= hour < 17: return "afternoon"
+        elif 17 <= hour < 22: return "evening"
+        else: return "night"
+
     def analyze_patterns(self, workflows: List[Dict[str, Any]], intent: str) -> Tuple[List[dict], float]:
         """
-        Calculates the probability of what sequence usually follows the current intent.
-        Returns the top predicted action sequence and its confidence score.
+        Level 2 Contextual Intelligence: Calculates probability using weighted multi-variable context.
         """
         if not workflows:
             return [], 0.0
             
         intent_lower = intent.lower()
-        matching_workflows = []
+        current_time_of_day = self._get_time_of_day()
+        now = time.time()
         
-        # Find workflows triggered by similar intent
+        sequence_buckets = {}
+        
+        # 1. Fuzzy Matching / Grouping
         for wf in workflows:
-            if intent_lower in str(wf.get("trigger_intent", "")).lower():
-                matching_workflows.append(wf["successful_pipeline"])
+            stored_intent = str(wf.get("trigger_intent", "")).lower()
+            if intent_lower not in stored_intent and stored_intent not in intent_lower:
+                continue
                 
-        if not matching_workflows:
-            return [], 0.0
-
-        # Frequency scoring: For Phase 6, we just find the most common sequence length and exact items.
-        # Natively, we stringify the JSON array to group them.
-        sequence_counts = {}
-        for seq in matching_workflows:
+            seq = wf.get("successful_pipeline", [])
             import json
             seq_str = json.dumps(seq, sort_keys=True)
-            sequence_counts[seq_str] = sequence_counts.get(seq_str, 0) + 1
-
-        if not sequence_counts:
-            return [], 0.0
+            if seq_str not in sequence_buckets:
+                sequence_buckets[seq_str] = []
+            sequence_buckets[seq_str].append(wf)
             
-        # Find the most frequent
-        top_seq_str = max(sequence_counts, key=sequence_counts.get)
-        frequency = sequence_counts[top_seq_str]
+        if not sequence_buckets:
+            return [], 0.0
+
+        best_seq_str = None
+        highest_confidence = 0.0
         
-        # Confidence = (How many times this exact sequence happened) / (Total times intent was executed)
-        confidence = round(frequency / len(matching_workflows), 2)
-        
+        # 2. Weighted Matrix Evaluation
+        for seq_str, wf_list in sequence_buckets.items():
+            freq = len(wf_list)
+            # Baseline frequency (max 0.4)
+            freq_weight = min(freq * 0.1, 0.4) 
+            
+            # Analyze contextual properties of the most recent occurrence of this sequence
+            best_wf = max(wf_list, key=lambda x: x.get("timestamp", 0))
+            
+            time_match_weight = 0.3 if best_wf.get("time_of_day") == current_time_of_day else 0.0
+            context_match_weight = 0.2 if best_wf.get("active_app") == "terminal" else 0.0
+            
+            # Recency Decay
+            hours_ago = (now - best_wf.get("timestamp", 0)) / 3600.0
+            decay = max(0, 0.1 - (hours_ago * 0.005)) 
+            
+            # Total Score Matrix
+            total_confidence = round(freq_weight + time_match_weight + context_match_weight + decay, 2)
+            
+            if total_confidence > highest_confidence:
+                highest_confidence = total_confidence
+                best_seq_str = seq_str
+                
         import json
-        predicted_sequence = json.loads(top_seq_str)
+        predicted_sequence = json.loads(best_seq_str)
         
-        return predicted_sequence, confidence
+        return predicted_sequence, highest_confidence
 
     def predict_next_action(self, current_intent: str, workflows: List[Dict[str, Any]]) -> dict:
         """

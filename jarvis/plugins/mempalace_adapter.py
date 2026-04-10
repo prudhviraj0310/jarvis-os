@@ -101,6 +101,13 @@ class MemPalaceAdapter:
             print(f"[MemPalace] Failed to export workflows: {e}")
             return []
 
+    def _get_time_of_day(self) -> str:
+        hour = time.localtime().tm_hour
+        if 5 <= hour < 12: return "morning"
+        elif 12 <= hour < 17: return "afternoon"
+        elif 17 <= hour < 22: return "evening"
+        else: return "night"
+
     def commit_success(self, intent: str, action_sequence: list):
         """
         Fire-and-forget success storage.
@@ -113,9 +120,10 @@ class MemPalaceAdapter:
             memory = self._load()
             drawer = memory.get("system_wing", {}).get("workflow_room", {}).get("browser_drawer", [])
             
-            # Simple deduplication - don't store exact duplicates
             new_entry = {
                 "timestamp": time.time(),
+                "time_of_day": self._get_time_of_day(),
+                "active_app": "terminal", # Phase 12 Placeholder for Wayland binding
                 "trigger_intent": intent,
                 "successful_pipeline": action_sequence
             }
