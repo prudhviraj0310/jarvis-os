@@ -166,8 +166,22 @@ class GuidanceEngine:
             print(f"[Setup Complete] {tool} API key secured in memory.")
             
         elif "browser_access" in reqs:
-            print("[Setup] OpenClaw requires underlying Wayland permissions.")
-            print("[Setup Complete] Simulated permission grant successful.")
+            print("[Setup] OpenClaw requires a valid user session for secure sites (e.g. GitHub/Gmail).")
+            domain = input("[Setup] If your workflow hits a secure site, enter the root domain (e.g. github.com) or press Enter to skip: ").strip()
+            
+            if domain:
+                try:
+                    from jarvis.system.browser_control import BrowserSessionManager
+                    bsm = BrowserSessionManager()
+                    print(f"\n[Jarvis Auth] Triggering Playwright Auth Interface for {domain}...")
+                    auth_success = bsm.authenticate(f"https://{domain}")
+                    if auth_success:
+                        print(f"[Setup Complete] {domain} cookies serialized and stored securely.")
+                        os.environ["OPENCLAW_AUTH_TARGET"] = domain
+                    else:
+                        print(f"[Setup Failed] Authentication aborted for {domain}.")
+                except Exception as e:
+                    print(f"[Jarvis Authentication ERROR] Browser Control Module failure: {e}")
             
         elif "service_running" in reqs:
             print("[Setup] Attempting to start n8n daemon...")

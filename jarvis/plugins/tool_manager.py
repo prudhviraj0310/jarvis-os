@@ -54,6 +54,17 @@ class ToolManager:
         
         try:
             cmd = ["openclaw", "run", "--prompt", intent]
+            
+            # Phase 13 Check for Authenticated Cookies
+            target_domain = os.environ.get("OPENCLAW_AUTH_TARGET")
+            if target_domain:
+                from jarvis.system.browser_control import BrowserSessionManager
+                bsm = BrowserSessionManager()
+                session_path = bsm.get_session_path(target_domain)
+                if session_path:
+                    print(f"\n[Jarvis Orchestrator] Injecting authenticated headless session for {target_domain}...")
+                    cmd.extend(["--session", session_path])
+                    
             result = subprocess.run(cmd)
             print("\n[Jarvis Orchestrator] Resuming control.")
             ui_callback("Automation Complete", "OpenClaw session ended.", "normal")
