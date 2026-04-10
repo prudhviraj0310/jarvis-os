@@ -37,6 +37,13 @@ class GuidanceEngine:
             "setup": "Start the n8n background daemon",
             "env_inject": None,
             "risk": "LOW"
+        },
+        "crewai": {
+            "description": "CrewAI is a sophisticated multi-agent orchestration framework that dynamically designs pipelines for complex tasks.",
+            "requirements": ["api_key"],
+            "setup": "Enter your OpenAI API key for CrewAI Orchestrator LLM",
+            "env_inject": "OPENAI_API_KEY",
+            "risk": "MODERATE"
         }
     }
 

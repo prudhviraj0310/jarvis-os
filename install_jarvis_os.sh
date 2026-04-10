@@ -2,7 +2,7 @@
 #
 # ╔═══════════════════════════════════════════════════════╗
 # ║           JARVIS OS — One-Command Installer           ║
-# ║   Boot from Arch Linux USB → Run this → Reboot       ║
+# ║   Boot from Arch Linux USB → Run this → Reboot        ║
 # ╚═══════════════════════════════════════════════════════╝
 #
 # Usage:
@@ -337,7 +337,7 @@ mkdir -p /var/lib/jarvis
 chown -R jarvis:jarvis /var/lib/jarvis
 
 # ── Install Python dependencies ──
-pip install --break-system-packages psutil 2>/dev/null || true
+pip install --break-system-packages psutil crewai langchain 2>/dev/null || true
 
 CHROOT_END
 

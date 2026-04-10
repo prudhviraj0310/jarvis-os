@@ -15,6 +15,7 @@ from jarvis.interface.listener import WakeWordEngine
 from jarvis.engine.tool_router import ToolRouter
 from jarvis.plugins.tool_manager import ToolManager
 from jarvis.engine.guidance import GuidanceEngine
+from jarvis.engine.planner import CrewAIPlanner
 
 class JarvisRuntime:
     def __init__(self, mode="interactive"):
@@ -32,6 +33,7 @@ class JarvisRuntime:
         self.tool_router = ToolRouter()
         self.tool_manager = ToolManager()
         self.guidance_layer = GuidanceEngine()
+        self.planner = CrewAIPlanner()
         
         self.running = False
         self.is_executing = False # Interrupt Safety Lock
@@ -201,9 +203,12 @@ class JarvisRuntime:
         except Exception as e:
             print(f"[Jarvis Behavior] Warning: Behavioral prediction skewed: {e}")
 
-        # 2. ORCHESTRATOR ROUTING (Phase 10 Extension: Multi-Agent DAGs)
-        # We now support pipelines: chaining external agents before yielding or continuing
-        pipeline = self.tool_router.route(user_intent)
+        # 2. ORCHESTRATOR ROUTING (Phase 10 & Phase 12 CrewAI Extension)
+        # If the intent requires planning, CrewAI builds a DAG. Else, static heuristic router is used securely.
+        if self.planner.should_plan(user_intent):
+            pipeline = self.planner.build_pipeline(user_intent)
+        else:
+            pipeline = self.tool_router.route(user_intent)
         
         # 3. ONBOARDING INTERCEPT (Phase 11: Guidance Engine)
         if not self.guidance_layer.validate_and_onboard(pipeline, self.voice):
