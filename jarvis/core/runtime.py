@@ -14,7 +14,7 @@ from jarvis.interface.overlay import OverlayEngine
 from jarvis.interface.listener import WakeWordEngine
 from jarvis.engine.tool_router import ToolRouter
 from jarvis.plugins.tool_manager import ToolManager
-
+from jarvis.engine.guidance import GuidanceEngine
 
 class JarvisRuntime:
     def __init__(self, mode="interactive"):
@@ -28,9 +28,10 @@ class JarvisRuntime:
         self.overlay = OverlayEngine() # Phase 8: Visual HUD
         self.listener = WakeWordEngine(self._wake_trigger) # Phase 9: Sentient Presence
         
-        # Tool Orchestration (Phase 10 Extension)
+        # Tool Orchestration (Phase 10 & 11)
         self.tool_router = ToolRouter()
         self.tool_manager = ToolManager()
+        self.guidance_layer = GuidanceEngine()
         
         self.running = False
         self.is_executing = False # Interrupt Safety Lock
@@ -49,6 +50,9 @@ class JarvisRuntime:
         
         # Start Autonomous Loop
         self.autonomous_thread.start()
+        
+        # Inject API keys/configs globally
+        self.guidance_layer.inject_environment()
         
         if self.mode == "daemon":
             self.listener.start()
@@ -169,7 +173,13 @@ class JarvisRuntime:
             self.is_executing = False
 
     def _process_intent_core(self, user_intent: str):
-        # 0. Phase 6 Prediction Engine Interceptor 
+        # 0. UNIVERSAL COMMAND HOOK
+        if user_intent.lower().startswith("help with "):
+            target_tool = user_intent.lower().replace("help with ", "").strip()
+            self.guidance_layer.provide_help(target_tool, self.voice)
+            return
+
+        # 1. Phase 6 Prediction Engine Interceptor 
         try:
             workflows = self.context_layer.mempalace.get_all_workflows()
             behavior_eval = self.behavior_layer.predict_next_action(user_intent, workflows)
@@ -191,9 +201,13 @@ class JarvisRuntime:
         except Exception as e:
             print(f"[Jarvis Behavior] Warning: Behavioral prediction skewed: {e}")
 
-        # 1. ORCHESTRATOR ROUTING (Phase 10 Extension: Multi-Agent DAGs)
+        # 2. ORCHESTRATOR ROUTING (Phase 10 Extension: Multi-Agent DAGs)
         # We now support pipelines: chaining external agents before yielding or continuing
         pipeline = self.tool_router.route(user_intent)
+        
+        # 3. ONBOARDING INTERCEPT (Phase 11: Guidance Engine)
+        if not self.guidance_layer.validate_and_onboard(pipeline, self.voice):
+            return
         
         external_agents_handled = False
         
