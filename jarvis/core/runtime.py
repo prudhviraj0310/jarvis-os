@@ -17,6 +17,7 @@ from jarvis.plugins.tool_manager import ToolManager
 from jarvis.engine.guidance import GuidanceEngine
 from jarvis.engine.planner import CrewAIPlanner
 from jarvis.engine.habits import HabitEngine
+from jarvis.system.browser_control import StatefulBrowserProxy
 
 class JarvisRuntime:
     def __init__(self, mode="interactive"):
@@ -36,6 +37,7 @@ class JarvisRuntime:
         self.guidance_layer = GuidanceEngine()
         self.planner = CrewAIPlanner()
         self.habit_layer = HabitEngine() # Phase 12 Habit Integration
+        self.browser_layer = StatefulBrowserProxy() # Phase 13 Browser Proxy
         
         self.running = False
         self.is_executing = False # Interrupt Safety Lock
@@ -358,23 +360,32 @@ class JarvisRuntime:
         
     def _route_pipeline(self, action_sequence: list, trigger_intent: str):
         success_flag = True
-        for idx, item in enumerate(action_sequence):
-            action_type = item.get("type")
-            
-            print(f"         [Pipeline {idx+1}/{len(action_sequence)}] Executing {action_type} action...")
-            
-            if action_type == "system":
-                success = self._handle_system_action(item)
-                if not success:
-                    print(f"         [Pipeline ERROR] System action failed/rejected. Aborting remainder of sequence.")
-                    success_flag = False
-                    break
-            elif action_type == "input":
-                success = self._handle_input_action(item)
-                if not success:
-                    print(f"         [Pipeline ERROR] Input action blocked. Aborting remainder of sequence.")
-                    success_flag = False
-                    break
+        try:
+            for idx, item in enumerate(action_sequence):
+                action_type = item.get("type")
+                
+                print(f"         [Pipeline {idx+1}/{len(action_sequence)}] Executing {action_type} action...")
+                
+                if action_type == "system":
+                    success = self._handle_system_action(item)
+                    if not success:
+                        print(f"         [Pipeline ERROR] System action failed/rejected. Aborting remainder of sequence.")
+                        success_flag = False
+                        break
+                elif action_type == "input":
+                    success = self._handle_input_action(item)
+                    if not success:
+                        print(f"         [Pipeline ERROR] Input action blocked. Aborting remainder of sequence.")
+                        success_flag = False
+                        break
+                elif action_type == "browser":
+                    success = self.browser_layer.execute_action(item)
+                    if not success:
+                        print(f"         [Pipeline ERROR] Browser action failed. Aborting remainder of sequence.")
+                        success_flag = False
+                        break
+        finally:
+            self.browser_layer.close()
         
         # 7. Commit successful workflow sequence back to L1/L3 memory
         if success_flag and action_sequence:
