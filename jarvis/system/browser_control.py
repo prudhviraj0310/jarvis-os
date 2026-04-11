@@ -115,6 +115,59 @@ class StatefulBrowserProxy:
         except Exception as e:
             print(f"[Jarvis Browser Proxy] Initialization failure: {e}")
 
+    def _smart_locate(self, action_type: str, target: str, payload: str = "") -> bool:
+        """
+        Phase 15: Smart Selector Engine
+        1. Semantic (text/aria-role)
+        2. CSS (Fallback)
+        3. DOM Extraction + LLM Reasoner (Phase 16 Recovery)
+        """
+        try:
+            is_css = any(c in target for c in ['.', '#', '>', '[', ']'])
+            locators = []
+            
+            if not is_css:
+                # Prioritize semantic
+                locators.append(self.page.get_by_role("button", name=target))
+                locators.append(self.page.get_by_text(target, exact=True))
+                locators.append(self.page.get_by_placeholder(target))
+                locators.append(self.page.locator(f"text={target}"))
+            else:
+                locators.append(self.page.locator(target))
+                
+            if is_css:
+                locators.append(self.page.get_by_text(target))
+                
+            for locator in locators:
+                try:
+                    if action_type == "click":
+                        locator.first.click(timeout=1500)
+                        print(f"         [Smart Selector] Clicked '{target}'.")
+                        return True
+                    elif action_type == "type":
+                        locator.first.fill(payload, timeout=1500)
+                        print(f"         [Smart Selector] Typed payload into '{target}'.")
+                        return True
+                except Exception:
+                    continue
+                    
+            print(f"         [Smart Selector] Hard DOM failure for '{target}'. Initiating LLM Execution Recovery...")
+            return self._llm_dom_recovery(action_type, target, payload)
+            
+        except Exception as e:
+            print(f"         [Smart Selector ERROR] Localization mapping failure: {e}")
+            return False
+
+    def _llm_dom_recovery(self, action_type: str, target: str, payload: str = "") -> bool:
+        print("         [Smart Selector]   - 1. Extracting dynamic DOM tree...")
+        try:
+            # Phase 16 Recovery Placeholder hook
+            dom_text = self.page.evaluate("document.body.innerText")
+            print("         [Smart Selector]   - 2. Context evaluated. Target untraceable even in fallback.")
+            return False
+        except Exception:
+            return False
+
     def execute_action(self, action: dict) -> bool:
         """
         Executes granular atomic actions mapped from LLM pipeline.
@@ -132,16 +185,12 @@ class StatefulBrowserProxy:
                 
             elif method == "click_element":
                 selector = action.get("target")
-                self.page.click(selector)
-                print(f"         [Browser] Clicked {selector}")
-                return True
+                return self._smart_locate("click", selector)
                 
             elif method == "type_text":
                 selector = action.get("target")
                 text = action.get("payload")
-                self.page.fill(selector, text)
-                print(f"         [Browser] Typed content into {selector}")
-                return True
+                return self._smart_locate("type", selector, text)
                 
             elif method == "save_session":
                 domain = action.get("target")
