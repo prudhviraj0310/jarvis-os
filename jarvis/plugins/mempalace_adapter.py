@@ -33,6 +33,9 @@ class MemPalaceAdapter:
                 "system_wing": {
                     "routine_room": {"daily_drawer": []},
                     "workflow_room": {"browser_drawer": []}
+                },
+                "knowledge_wing": {
+                    "library_room": {}
                 }
             }
             self._save(base_structure)
@@ -138,3 +141,39 @@ class MemPalaceAdapter:
             self._save(memory)
         except Exception as e:
             print(f"[MemPalace] Commit failed: {e}")
+
+    def store_knowledge(self, topic: str, content: str):
+        """
+        Phase 18: Ingests structured domain knowledge directly into the library.
+        """
+        if not self.enabled:
+            return
+            
+        try:
+            memory = self._load()
+            library = memory.get("knowledge_wing", {}).get("library_room", {})
+            
+            # Simple Key-Value for now
+            library[topic] = {
+                "timestamp": time.time(),
+                "content": content
+            }
+            
+            if "knowledge_wing" not in memory:
+                memory["knowledge_wing"] = {"library_room": {}}
+                
+            memory["knowledge_wing"]["library_room"] = library
+            self._save(memory)
+        except Exception as e:
+            print(f"[MemPalace] Knowledge commit failed: {e}")
+            
+    def query_knowledge(self, topic: str) -> str:
+        """
+        Returns contextual markdown if it exists in the library.
+        """
+        try:
+            memory = self._load()
+            library = memory.get("knowledge_wing", {}).get("library_room", {})
+            return library.get(topic, {}).get("content", "")
+        except Exception:
+            return ""

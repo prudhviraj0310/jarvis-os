@@ -18,6 +18,7 @@ from jarvis.engine.guidance import GuidanceEngine
 from jarvis.engine.planner import CrewAIPlanner
 from jarvis.engine.habits import HabitEngine
 from jarvis.system.browser_control import StatefulBrowserProxy
+from jarvis.plugins.firecrawl_adapter import FirecrawlAdapter
 
 class JarvisRuntime:
     def __init__(self, mode="interactive"):
@@ -38,6 +39,7 @@ class JarvisRuntime:
         self.planner = CrewAIPlanner()
         self.habit_layer = HabitEngine() # Phase 12 Habit Integration
         self.browser_layer = StatefulBrowserProxy() # Phase 13 Browser Proxy
+        self.firecrawl_adapter = FirecrawlAdapter() # Phase 17 Ingestion
         
         self.running = False
         self.is_executing = False # Interrupt Safety Lock
@@ -268,6 +270,21 @@ class JarvisRuntime:
                 external_agents_handled = True
                 print(f"\n[Jarvis Orchestrator] Delegating task to {tool}: '{task}'")
                 
+                if tool == "firecrawl":
+                    self.voice.speak("Extracting knowledge.", priority=Priority.ASSIST)
+                    self.overlay.show_status("Auto-Learning", "Extracting domain documentation...", "normal")
+                    
+                    url = [word for word in task.split() if "http" in word]
+                    if url:
+                        result = self.firecrawl_adapter.learn_domain(url[0])
+                        if result["status"] == "success":
+                            self.context_layer.mempalace.store_knowledge(result["title"], result["markdown"])
+                            self.voice.speak("Knowledge ingested successfully.", priority=Priority.ROUTINE)
+                            self.overlay.show_status("Success", "Documentation bound to context.", "normal")
+                    else:
+                        print("[Jarvis Orchestrator] No explicit URL provided for Firecrawl ingestion.")
+                    continue
+                    
                 if not self.tool_manager.is_installed(tool):
                     print(f"[Jarvis Orchestrator] Module '{tool}' is not installed.")
                     self.voice.speak("Tool not installed.")

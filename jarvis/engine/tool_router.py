@@ -15,10 +15,13 @@ class ToolRouter:
                 "edit file", "fix bug", "refactor test", "inline edit", "terminal code"
             ],
             "openclaw": [
-                "crawl", "scrape", "repetitive", "organize documents", "background task"
+                "crawl", "scrape", "repetitive", "organize documents", "background task", "monitor", "continuously"
             ],
             "n8n": [
                 "api pipeline", "visual workflow", "connect services", "email trigger automation"
+            ],
+            "firecrawl": [
+                "learn", "study", "read docs", "ingest url", "scrape context", "understand"
             ]
         }
 
@@ -31,7 +34,6 @@ class ToolRouter:
         pipeline = []
         
         # 1. Multi-Agent DAG Check
-        # If the intent requires designing and running, chain them.
         if "build" in intent_lower and "scraper" in intent_lower:
             pipeline.append({"tool": "claude_code", "task": f"Write the python code for: {intent}"})
             pipeline.append({"tool": "openclaw", "task": "Execute the newly created scraper and verify outputs"})
@@ -47,17 +49,22 @@ class ToolRouter:
             pipeline.append({"tool": "aider", "task": intent})
             return pipeline
 
-        # 4. Check for Headless Automation (OpenClaw)
+        # 4. Check for Autonomous Web Agents (Firecrawl) - Phase 17
+        if any(keyword in intent_lower for keyword in self.routes["firecrawl"]):
+            pipeline.append({"tool": "firecrawl", "task": intent})
+            return pipeline
+
+        # 5. Check for Headless Automation (OpenClaw)
         if any(keyword in intent_lower for keyword in self.routes["openclaw"]):
             pipeline.append({"tool": "openclaw", "task": intent})
             return pipeline
 
-        # 5. Check for Visual API Workflows (n8n)
+        # 6. Check for Visual API Workflows (n8n)
         if any(keyword in intent_lower for keyword in self.routes["n8n"]):
             pipeline.append({"tool": "n8n", "task": intent})
             return pipeline
 
-        # 6. Default to the fast Local LLM (System Control Layer)
+        # 7. Default to the fast Local LLM (System Control Layer)
         pipeline.append({
             "tool": "system",
             "task": intent
