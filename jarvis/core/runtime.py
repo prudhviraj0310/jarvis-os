@@ -16,6 +16,7 @@ from jarvis.engine.tool_router import ToolRouter
 from jarvis.plugins.tool_manager import ToolManager
 from jarvis.engine.guidance import GuidanceEngine
 from jarvis.engine.planner import CrewAIPlanner
+from jarvis.engine.habits import HabitEngine
 
 class JarvisRuntime:
     def __init__(self, mode="interactive"):
@@ -34,9 +35,15 @@ class JarvisRuntime:
         self.tool_manager = ToolManager()
         self.guidance_layer = GuidanceEngine()
         self.planner = CrewAIPlanner()
+        self.habit_layer = HabitEngine() # Phase 12 Habit Integration
         
         self.running = False
         self.is_executing = False # Interrupt Safety Lock
+        
+        # Proactive Presence Trackers
+        self.last_interaction_time = time.time()
+        self.last_proactive_time = 0.0
+        self.pending_proactive_habit = []
         
         # V2: Proactive Intelligence Loop
         self.autonomous_thread = threading.Thread(target=self._run_autonomous_loop, daemon=True)
@@ -94,6 +101,24 @@ class JarvisRuntime:
                 time.sleep(60) # Poll every 60 seconds
                 if not self.running or self.is_executing:
                     continue
+                    
+                now = time.time()
+                
+                # Phase 11 & 12: Idle Habit Proactive Triggers
+                # If idle > 2 minutes and hasn't spoken proactively in an hour (cooldown)
+                if now - self.last_interaction_time > 120 and now - self.last_proactive_time > 3600:
+                    workflows = self.context_layer.mempalace.get_all_workflows()
+                    habit_sequence, habit_confidence = self.habit_layer.check_habits(workflows)
+                    
+                    if habit_confidence >= self.habit_layer.HABIT_CONFIDENCE_THRESHOLD:
+                        self.last_proactive_time = now
+                        self.pending_proactive_habit = habit_sequence
+                        self.voice.play_cue("listening")
+                        print(f"\n[Jarvis Proactive] Context-aware habit detected (Confidence: {habit_confidence}).")
+                        print(f"                   Sequence: {json.dumps(habit_sequence)[:60]}...")
+                        self.voice.speak("Should I start your routine?", priority=Priority.ASSIST)
+                        self.overlay.show_status("Habit Detected", "Autonomy standing by.", "normal")
+                        continue 
                     
                 # We generate a passive pseudo-intent based on OS state. In real prod, this is tied to triggers.
                 # For Phase 11, we pass an empty "system_tick" intent to evaluate the time/date states.
@@ -169,17 +194,34 @@ class JarvisRuntime:
 
     def _process_intent(self, user_intent: str):
         self.is_executing = True
+        self.last_interaction_time = time.time()
         try:
             self._process_intent_core(user_intent)
         finally:
             self.is_executing = False
 
     def _process_intent_core(self, user_intent: str):
-        # 0. UNIVERSAL COMMAND HOOK
+        # 0. HABIT CONFIRMATION HOOK
+        if self.pending_proactive_habit and (user_intent.lower() in ["y", "yes", "sure", "do it"]):
+            pipeline = self.pending_proactive_habit
+            self.pending_proactive_habit = []
+            print("[Jarvis] Auto-chaining proactive habit sequence.")
+            self.voice.speak("Proceeding.", priority=Priority.ASSIST)
+            self._route_pipeline(pipeline, "habit_auto_trigger")
+            return
+        elif self.pending_proactive_habit:
+            self.pending_proactive_habit = [] # Drop it if they say anything else
+            
+        # 1. UNIVERSAL COMMAND HOOK
         if user_intent.lower().startswith("help with "):
             target_tool = user_intent.lower().replace("help with ", "").strip()
             self.guidance_layer.provide_help(target_tool, self.voice)
             return
+
+        if self.pending_proactive_habit is None:
+            pass # Handle edge case but we already cleared it if we reached here
+        elif "y" in user_intent.lower() and not self.pending_proactive_habit:
+            pass # continue normal parsing
 
         # 1. Phase 6 Prediction Engine Interceptor 
         try:
