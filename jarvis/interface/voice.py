@@ -37,24 +37,34 @@ class VoiceEngine:
         except FileNotFoundError:
             pass
 
-    def speak(self, text: str, priority: Priority = Priority.ROUTINE):
+    def can_speak(self, priority: Priority = Priority.ROUTINE) -> bool:
         """
-        Speaks text conditionally based on priority and fatigue tokens.
+        Checks if the voice engine is allowed to speak right now based on fatigue rules.
         """
         self._cull_history()
-        
-        # Priority rules
         if priority == Priority.ROUTINE:
-            return  # Silent execution
+            return False
             
         if priority == Priority.ASSIST:
             if len(self.history) >= self.MAX_EVENTS_PER_MIN:
-                # Fatigue threshold reached, system stays silent to avoid irritation.
-                # It will automatically recover after a minute.
-                return
+                return False
+                
+        return True
+
+    def consume_fatigue_token(self):
+        """Deducts a token when an external streaming engine speaks."""
+        self.history.append(time.time())
+
+    def speak(self, text: str, priority: Priority = Priority.ROUTINE):
+        """
+        Legacy static TTS. Conditionally speaks text based on priority and fatigue tokens.
+        Consider using VoiceStream's DuplexAudioEngine for real-time interactions.
+        """
+        if not self.can_speak(priority):
+            return
                 
         # Critical bypasses fatigue checks OR Assist passed fatigue checks
-        self.history.append(time.time())
+        self.consume_fatigue_token()
         t = threading.Thread(target=self._run_espeak, args=(text,), daemon=True)
         t.start()
 

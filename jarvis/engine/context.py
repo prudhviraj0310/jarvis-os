@@ -22,6 +22,16 @@ class ContextEngine:
         # Layer 3: Long-Term Workflow Recall (Adapter)
         self.mempalace = MemPalaceAdapter()
 
+    def get_ephemeral_context(self) -> dict:
+        """
+        Ultra-fast getter for Voice Streaming Engine to pull state mid-sentence
+        without blocking on Layer 3 MemPalace queries.
+        """
+        return {
+            "L1_recent_actions": list(self.short_term_memory),
+            "L2_session_state": self.active_context
+        }
+
     def enrich(self, user_intent: str) -> dict:
         """
         Takes raw intent string and packs it with tiered contextual knowledge.
@@ -31,7 +41,8 @@ class ContextEngine:
             "raw_intent": user_intent,
             "L1_recent_actions": list(self.short_term_memory),
             "L2_session_state": self.active_context,
-            "L3_workflow_history": None
+            "L3_workflow_history": None,
+            "L3_knowledge_base": None
         }
 
         # Query Layer 3 only if we need pattern matching.
@@ -41,6 +52,20 @@ class ContextEngine:
             l3_data = self.mempalace.query_history(user_intent)
             if l3_data:
                 enriched_payload["L3_workflow_history"] = l3_data
+                
+            # Phase 18: RAG Retrieval Hook
+            # Extract basic keywords to probe knowledge base
+            keywords = user_intent.lower().split()
+            extracted_rag = []
+            for word in keywords:
+                if len(word) > 4:  # Avoid common stop words
+                    kn = self.mempalace.query_knowledge(word)
+                    if kn:
+                        extracted_rag.append(f"[{word.upper()}]: {kn}")
+                        
+            if extracted_rag:
+                enriched_payload["L3_knowledge_base"] = "\n".join(extracted_rag)
+                
         except Exception as e:
             print(f"[Context Engine] Layer 3 query degraded safely: {e}")
 

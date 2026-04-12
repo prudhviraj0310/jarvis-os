@@ -3,7 +3,7 @@
 
 iso_name="jarvis-os"
 iso_label="JARVIS_$(date +%Y%m)"
-iso_publisher="HexaInd <https://tac-hospitality.com>"
+iso_publisher="Prudhviraj <http://prudhviraj-portfolio.onrender.com>"
 iso_application="Jarvis OS Live/Rescue CD"
 iso_version="$(date +%Y.%m.%d)"
 install_dir="arch"

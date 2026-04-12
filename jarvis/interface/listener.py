@@ -9,10 +9,15 @@ class WakeWordEngine:
     Runs 'Vosk' with 'sounddevice' continuously grabbing 16kHz audio from ALSA.
     It expects 'vosk-model-small-en-us' in the root or /opt/jarvis/.
     """
-    def __init__(self, callback):
+    def __init__(self, callback, shared_input_queue=None):
         self.callback = callback
-        self.q = queue.Queue()
+        self.q = shared_input_queue if shared_input_queue else queue.Queue()
         self.listening = False
+        self._shared_queue_mode = shared_input_queue is not None
+        
+        # Phase Z: HUD
+        from jarvis.interface.overlay import OverlayEngine
+        self.hud = OverlayEngine()
 
     def _audio_callback(self, indata, frames, time, status):
         """This is called continuously by sounddevice for each audio block."""
@@ -48,35 +53,47 @@ class WakeWordEngine:
         rec = vosk.KaldiRecognizer(model, samplerate)
 
         try:
-            with sd.RawInputStream(samplerate=samplerate, blocksize=8000, dtype='int16',
-                                   channels=1, callback=self._audio_callback):
-                self.listening = True
-                print("[Jarvis Wake] Sentient presence active. Listening passively.")
-                
+            self.listening = True
+            print("[Jarvis Wake] Sentient presence active. Listening passively.")
+            
+            # If using shared queue, bypass sounddevice open
+            if self._shared_queue_mode:
                 while self.listening:
                     data = self.q.get()
                     if rec.AcceptWaveform(data):
-                        result = json.loads(rec.Result())
-                        text = result.get("text", "")
-                        
-                        # WAKE WORD TRIGGERS HERE
-                        if "jarvis" in text:
-                            # False Trigger Defense: Must have substance or be exactly 'jarvis'
-                            intent = text.replace("jarvis", "").strip()
-                            
-                            # Ignore random single-syllable phantom noise picked up as 'jarvis a'
-                            if len(intent) > 0 and len(intent) < 3:
-                                continue
-                                
-                            if not intent:
-                                intent = "System Wake" # Generic awake intent
-                            
-                            # Fire the background callback
-                            threading.Thread(target=self.callback, args=(intent,), daemon=True).start()
+                        self._process_result(rec)
+            else:
+                with sd.RawInputStream(samplerate=samplerate, blocksize=8000, dtype='int16',
+                                       channels=1, callback=self._audio_callback):
+                    while self.listening:
+                        data = self.q.get()
+                        if rec.AcceptWaveform(data):
+                            self._process_result(rec)
                             
         except Exception as e:
             print(f"[Jarvis Wake ERROR] Audio capture crashed: {e}")
             self.listening = False
+
+    def _process_result(self, rec):
+        result = json.loads(rec.Result())
+        text = result.get("text", "")
+        # WAKE WORD TRIGGERS HERE
+        if "jarvis" in text:
+            # Phase Z: Flash Wake Word UI immediately
+            self.hud.listening()
+            
+            # False Trigger Defense: Must have substance or be exactly 'jarvis'
+            intent = text.replace("jarvis", "").strip()
+            
+            # Ignore random single-syllable phantom noise picked up as 'jarvis a'
+            if len(intent) > 0 and len(intent) < 3:
+                return
+                
+            if not intent:
+                intent = "System Wake" # Generic awake intent
+            
+            # Fire the background callback
+            threading.Thread(target=self.callback, args=(intent,), daemon=True).start()
 
     def start(self):
         if not self.listening:

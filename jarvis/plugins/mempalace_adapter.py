@@ -142,6 +142,63 @@ class MemPalaceAdapter:
         except Exception as e:
             print(f"[MemPalace] Commit failed: {e}")
 
+    # Phase 30: Memory Compression (Garbage Collection & Summarization)
+    def _score_memory(self, entry: dict) -> float:
+        """Calculates retention importance. < 0.3 means delete."""
+        score = 0.0
+        now = time.time()
+        
+        # 1. Decay scalar
+        hours_ago = (now - entry.get("timestamp", now)) / 3600
+        decay = max(0, 1.0 - (hours_ago * 0.01))
+        score += (decay * 0.4) # Base weight of recent
+        
+        # 2. Used often (mock check tracking execute counts)
+        if entry.get("used_count", 0) > 3:
+            score += 0.4
+            
+        # 3. User Confirmation 
+        if entry.get("confirmed"):
+            score += 0.2
+            
+        return score
+
+    def compress(self):
+        """
+        Garbage Collector for long-term memory.
+        Clears spam and shrinks JSON bounds.
+        """
+        if not self.enabled: return
+        print("[MemPalace] 🧹 Initiating Memory Compression Loop...")
+        
+        try:
+            memory = self._load()
+            drawer = memory.get("system_wing", {}).get("workflow_room", {}).get("browser_drawer", [])
+            
+            clean_drawer = []
+            for entry in drawer:
+                if self._score_memory(entry) >= 0.3:
+                    clean_drawer.append(entry)
+                    
+            # 2. Summarize duplicates (Mock implementation)
+            yt_count = sum(1 for e in clean_drawer if "youtube" in e.get("trigger_intent", "").lower())
+            if yt_count >= 5:
+                # Store structural rule directly in memory dict (avoid load/save race)
+                if "knowledge_wing" not in memory:
+                    memory["knowledge_wing"] = {"library_room": {}}
+                memory["knowledge_wing"]["library_room"]["habit_youtube"] = {
+                    "timestamp": time.time(),
+                    "content": "User consistently prefers YouTube. Default to lofi autosearch."
+                }
+                clean_drawer = [e for e in clean_drawer if "youtube" not in e.get("trigger_intent", "").lower()]
+                print("[MemPalace] 🧬 Behavior summarized to Knowledge Library.")
+
+            memory["system_wing"]["workflow_room"]["browser_drawer"] = clean_drawer
+            self._save(memory)
+            print(f"[MemPalace] 🧹 Compression complete. Deleted {len(drawer) - len(clean_drawer)} stale entries.")
+        except Exception as e:
+            print(f"[MemPalace] Compression failed: {e}")
+
     def store_knowledge(self, topic: str, content: str):
         """
         Phase 18: Ingests structured domain knowledge directly into the library.

@@ -1,46 +1,60 @@
 import subprocess
 import time
+import os
 
 class OverlayEngine:
     """
-    Cinematic visual feedback layer using 'notify-send'.
-    Features debounce logic to prevent spam.
+    Phase Z: HUD & Soul.
+    Cinematic visual feedback layer using 'notify-send' with Mako semantics.
+    Enforces a single card replacing itself cleanly (ID 1234) and plays sub-chimes.
     """
-    
     def __init__(self):
-        self.app_name = "Jarvis OS"
-        self.last_msg = ""
-        self.last_time = 0.0
-        # 500ms debounce
-        self.DEBOUNCE_DELAY = 0.5
-        
-    def show_status(self, title: str, message: str, urgency: str = "normal"):
-        """
-        Displays a non-blocking HUD element. Debounces identical/rapid messages.
-        Urgency levels: 'low', 'normal', 'critical'
-        """
-        current_time = time.time()
-        
-        # Debounce rapid fire
-        if current_time - self.last_time < self.DEBOUNCE_DELAY:
-            return
+        self.app_name = "Jarvis HUD"
+        # Magic ID ensures notifications overwrite each other instead of stacking visually
+        self.replace_id = "999" 
+        self.asset_dir = os.path.expanduser("~/.config/jarvis/assets/sounds")
+
+    def _play_sfx(self, filename: str):
+        """Asynchronously plays a soft chime via PulseAudio/Pipewire."""
+        path = os.path.join(self.asset_dir, filename)
+        if os.path.exists(path):
+            subprocess.Popen(["paplay", path], stderr=subprocess.DEVNULL)
+
+    def _dispatch(self, title: str, urgency: str, timeout: str, sfx: str = None):
+        """Native dispatcher holding the single replace UI."""
+        if sfx:
+            self._play_sfx(sfx)
             
-        # Optional: Prevent repeating the exact same message back-to-back quickly
-        if self.last_msg == message and (current_time - self.last_time < 2.0):
-            return
-
-        self.last_msg = message
-        self.last_time = current_time
-
         try:
-            # -a "App Name" replaces identical cards implicitly in modern libnotify
+            # -p allows grabbing the ID but we use a fixed hint string to force Mako overwrite
+            # Note: mako supports `-h string:x-canonical-private-synchronous:jarvis` to group identical cards
             subprocess.Popen([
                 "notify-send",
                 "-a", self.app_name,
                 "-u", urgency,
-                "-t", "4000",
-                title,
-                message
+                "-t", timeout,
+                "-h", "string:x-canonical-private-synchronous:jarvis_hud",
+                title
             ], stderr=subprocess.DEVNULL)
         except FileNotFoundError:
             pass
+
+    def listening(self):
+        """Top-right small pulse: softly triggers on wake."""
+        self._dispatch("● Listening...", "normal", "0", "ping_high.wav") # 0 = sticky until replaced
+
+    def processing(self):
+        """Thin circular spinner: triggers when LLM is querying."""
+        self._dispatch("◌ Processing...", "normal", "0") # No sfx needed, sticky
+
+    def executing(self):
+        """Quick flash for script runs."""
+        self._dispatch("→ Executing", "normal", "1000")
+
+    def success(self):
+        """Fades instantly on success."""
+        self._dispatch("✓ Done", "low", "1500", "click.wav")
+
+    def warning(self):
+        """Critical block notification."""
+        self._dispatch("⚠ Critical Command Blocked", "critical", "3000", "buzz_low.wav")
