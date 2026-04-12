@@ -1,0 +1,192 @@
+/*
+ * JARVIS OS — Waybar Theme
+ * ==========================
+ * Iron Man HUD-inspired taskbar.
+ * Glassmorphism + cyan accent + monospace + subtle borders.
+ *
+ * Install: Copy to ~/.config/waybar/style.css
+ */
+
+/* ═══════════════════════════════════════════
+   GLOBAL
+   ═══════════════════════════════════════════ */
+* {
+    font-family: "JetBrains Mono", "FiraCode Nerd Font", "Cascadia Code", monospace;
+    font-size: 13px;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+}
+
+/* ═══════════════════════════════════════════
+   MAIN BAR
+   ═══════════════════════════════════════════ */
+window#waybar {
+    background-color: rgba(8, 10, 18, 0.88);
+    color: #c4cad6;
+    border-bottom: 1px solid rgba(51, 204, 255, 0.15);
+    transition: background-color 0.3s;
+}
+
+window#waybar.hidden {
+    opacity: 0.3;
+}
+
+/* ═══════════════════════════════════════════
+   JARVIS BRANDING (LEFT)
+   ═══════════════════════════════════════════ */
+#custom-jarvis {
+    background: linear-gradient(135deg, rgba(51, 204, 255, 0.15), rgba(0, 255, 153, 0.08));
+    color: #33ccff;
+    font-weight: bold;
+    font-size: 13px;
+    border-radius: 6px;
+    padding: 2px 14px;
+    margin: 4px 8px 4px 6px;
+    border: 1px solid rgba(51, 204, 255, 0.2);
+    text-shadow: 0 0 8px rgba(51, 204, 255, 0.3);
+}
+
+/* ═══════════════════════════════════════════
+   JARVIS STATUS INDICATOR (pulsing dot)
+   ═══════════════════════════════════════════ */
+#custom-jarvis-status {
+    color: #33ccff;
+    font-size: 8px;
+    padding: 0 6px;
+    margin: 6px 0;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1.0; }
+}
+
+/* ═══════════════════════════════════════════
+   WORKSPACES
+   ═══════════════════════════════════════════ */
+#workspaces button {
+    padding: 0 8px;
+    margin: 4px 2px;
+    color: #556677;
+    background: transparent;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+#workspaces button:hover {
+    background: rgba(51, 204, 255, 0.08);
+    color: #88aacc;
+}
+
+#workspaces button.active {
+    background: rgba(51, 204, 255, 0.12);
+    color: #33ccff;
+    border-bottom: 2px solid #33ccff;
+    text-shadow: 0 0 6px rgba(51, 204, 255, 0.4);
+}
+
+#workspaces button.urgent {
+    background: rgba(255, 80, 80, 0.15);
+    color: #ff5050;
+}
+
+/* ═══════════════════════════════════════════
+   CENTER CLOCK
+   ═══════════════════════════════════════════ */
+#clock {
+    color: #e0e4ec;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 0 16px;
+}
+
+/* ═══════════════════════════════════════════
+   RIGHT MODULES
+   ═══════════════════════════════════════════ */
+#pulseaudio,
+#network,
+#cpu,
+#memory,
+#temperature,
+#battery,
+#tray {
+    padding: 0 10px;
+    margin: 4px 2px;
+    color: #8899aa;
+    transition: color 0.2s;
+}
+
+#pulseaudio:hover,
+#network:hover,
+#cpu:hover,
+#battery:hover {
+    color: #ccddee;
+}
+
+/* ═══════════════════════════════════════════
+   BATTERY STATES
+   ═══════════════════════════════════════════ */
+#battery.charging {
+    color: #00ff99;
+}
+
+#battery.warning:not(.charging) {
+    color: #ffbb33;
+}
+
+#battery.critical:not(.charging) {
+    color: #ff4444;
+    animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0.5; }
+}
+
+/* ═══════════════════════════════════════════
+   NETWORK
+   ═══════════════════════════════════════════ */
+#network.disconnected {
+    color: #ff5555;
+}
+
+#network.wifi {
+    color: #33ccff;
+}
+
+/* ═══════════════════════════════════════════
+   AUDIO
+   ═══════════════════════════════════════════ */
+#pulseaudio.muted {
+    color: #555566;
+}
+
+/* ═══════════════════════════════════════════
+   SYSTEM TRAY
+   ═══════════════════════════════════════════ */
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+}
+
+/* ═══════════════════════════════════════════
+   TOOLTIPS
+   ═══════════════════════════════════════════ */
+tooltip {
+    background: rgba(8, 10, 18, 0.95);
+    border: 1px solid rgba(51, 204, 255, 0.2);
+    border-radius: 8px;
+    color: #c4cad6;
+}
+
+tooltip label {
+    padding: 4px 8px;
+}

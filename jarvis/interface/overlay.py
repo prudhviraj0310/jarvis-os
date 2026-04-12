@@ -5,14 +5,29 @@ import os
 class OverlayEngine:
     """
     Phase Z: HUD & Soul.
-    Cinematic visual feedback layer using 'notify-send' with Mako semantics.
-    Enforces a single card replacing itself cleanly (ID 1234) and plays sub-chimes.
+    Cinematic visual feedback layer.
+    
+    Strategy:
+      1. Try native GTK4 HUD (JarvisHUD via layer-shell) — the Iron Man overlay
+      2. Fallback to notify-send with Mako semantics — lightweight text notifications
     """
     def __init__(self):
         self.app_name = "Jarvis HUD"
-        # Magic ID ensures notifications overwrite each other instead of stacking visually
         self.replace_id = "999" 
         self.asset_dir = os.path.expanduser("~/.config/jarvis/assets/sounds")
+        self._native_hud = None
+        self._debounce_ts = 0
+        self._init_native_hud()
+
+    def _init_native_hud(self):
+        """Try to connect to the native GTK4 HUD if it's running."""
+        try:
+            from jarvis.ui.hud import JarvisHUD
+            self._native_hud = JarvisHUD()
+            self._native_hud.run_background()
+            print("[OverlayEngine] Native GTK4 HUD active.")
+        except Exception:
+            self._native_hud = None
 
     def _play_sfx(self, filename: str):
         """Asynchronously plays a soft chime via PulseAudio/Pipewire."""
@@ -20,14 +35,20 @@ class OverlayEngine:
         if os.path.exists(path):
             subprocess.Popen(["paplay", path], stderr=subprocess.DEVNULL)
 
+    def _debounce(self) -> bool:
+        """Prevents rapid-fire overlay spam. Returns True if should skip."""
+        now = time.time()
+        if now - self._debounce_ts < 0.5:
+            return True
+        self._debounce_ts = now
+        return False
+
     def _dispatch(self, title: str, urgency: str, timeout: str, sfx: str = None):
-        """Native dispatcher holding the single replace UI."""
+        """Fallback dispatcher using notify-send (Mako)."""
         if sfx:
             self._play_sfx(sfx)
-            
+
         try:
-            # -p allows grabbing the ID but we use a fixed hint string to force Mako overwrite
-            # Note: mako supports `-h string:x-canonical-private-synchronous:jarvis` to group identical cards
             subprocess.Popen([
                 "notify-send",
                 "-a", self.app_name,
@@ -39,22 +60,63 @@ class OverlayEngine:
         except FileNotFoundError:
             pass
 
+    # ══════════════════════════════════════════
+    # Public API — called from engine layers
+    # ══════════════════════════════════════════
+
     def listening(self):
-        """Top-right small pulse: softly triggers on wake."""
-        self._dispatch("● Listening...", "normal", "0", "ping_high.wav") # 0 = sticky until replaced
+        """Pulsing arc reactor indicator."""
+        if self._debounce():
+            return
+        if self._native_hud:
+            self._native_hud.listening()
+        else:
+            self._dispatch("● Listening...", "normal", "0", "ping_high.wav")
 
     def processing(self):
-        """Thin circular spinner: triggers when LLM is querying."""
-        self._dispatch("◌ Processing...", "normal", "0") # No sfx needed, sticky
+        """Spinning ring animation."""
+        if self._debounce():
+            return
+        if self._native_hud:
+            self._native_hud.thinking()
+        else:
+            self._dispatch("◌ Processing...", "normal", "0")
 
     def executing(self):
-        """Quick flash for script runs."""
-        self._dispatch("→ Executing", "normal", "1000")
+        """Energy flow progress bar."""
+        if self._debounce():
+            return
+        if self._native_hud:
+            self._native_hud.executing()
+        else:
+            self._dispatch("→ Executing", "normal", "1000")
 
     def success(self):
-        """Fades instantly on success."""
-        self._dispatch("✓ Done", "low", "1500", "click.wav")
+        """Expanding green confirmation ring."""
+        if self._native_hud:
+            self._native_hud.success()
+        else:
+            self._dispatch("✓ Done", "low", "1500", "click.wav")
 
     def warning(self):
-        """Critical block notification."""
-        self._dispatch("⚠ Critical Command Blocked", "critical", "3000", "buzz_low.wav")
+        """Amber warning with alert sound."""
+        if self._native_hud:
+            self._native_hud.warning("Critical Command Blocked")
+        else:
+            self._dispatch("⚠ Critical Command Blocked", "critical", "3000", "buzz_low.wav")
+
+    def speaking(self, text=""):
+        """Waveform visualization while TTS is playing."""
+        if self._native_hud:
+            self._native_hud.speaking(text)
+        else:
+            self._dispatch(f"♪ {text}", "low", "5000")
+
+    def show_status(self, title: str, body: str, urgency: str):
+        """Generic status display — used by tests and external callers."""
+        if self._debounce():
+            return
+        if self._native_hud:
+            self._native_hud.show("thinking", title, body)
+        else:
+            self._dispatch(f"{title}: {body}", urgency, "3000")

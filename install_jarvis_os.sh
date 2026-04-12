@@ -157,6 +157,15 @@ echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/wheel
 # ── GRUB Bootloader ──
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=JARVIS --removable 2>/dev/null || \
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=JARVIS
+
+# ── GRUB Theme (Iron Man boot screen) ──
+python3 /opt/jarvis/jarvis/ui/grub_theme.py --install 2>/dev/null || true
+if [ -f /boot/grub/themes/jarvis/theme.txt ]; then
+    sed -i 's|^#*GRUB_THEME=.*|GRUB_THEME="/boot/grub/themes/jarvis/theme.txt"|' /etc/default/grub
+    echo 'GRUB_TIMEOUT_STYLE=menu' >> /etc/default/grub
+    echo 'GRUB_TIMEOUT=5' >> /etc/default/grub
+fi
+
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # ── Enable core services ──
@@ -189,7 +198,7 @@ monitor=,preferred,auto,auto
 
 exec-once = waybar
 exec-once = mako
-exec-once = /usr/local/bin/jarvis-start.sh
+exec-once = bash /opt/jarvis/jarvis/ui/jarvis_start.sh
 
 env = XCURSOR_SIZE,24
 

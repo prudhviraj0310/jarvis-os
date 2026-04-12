@@ -54,7 +54,12 @@ thunar
 # Jarvis Engine Requirements
 python
 python-pip
+python-gobject
+python-cairo
 espeak-ng
 libnotify
+gtk4
+gtk4-layer-shell
+ttf-jetbrains-mono
 
 # We install Ollama, Vosk, Sounddevice via pip/script during firstboot or install.
