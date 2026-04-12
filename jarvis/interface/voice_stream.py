@@ -114,7 +114,8 @@ class ToolInterceptor:
     Monitors the text stream from the LLM. If a tool pattern is detected,
     it intercepts the generation and routes it to the local OS.
     """
-    def __init__(self):
+    def __init__(self, agent=None):
+        self.agent = agent
         self.buffer = ""
         # Native mapping for tools
         self.tools = {
@@ -232,10 +233,15 @@ class ToolInterceptor:
         from jarvis.system.screen import ScreenAwarenessLayer
         print("-> Multimodal Vision: Analyzing active screen...")
         res = ScreenAwarenessLayer().analyze_screen()
-        print(f"-> Vision Read: {res}\n(Synthesizing follow-up not yet linked dynamically in stream, but context stored!)")
+        print(f"-> Vision Read: {res}")
         
-        # In a fully recursive setup, this would loop back into handle_voice_input.
-        # For Phase C, we just run the tool and log the output.
+        if self.agent:
+            print("-> 🔄 Closing the Loop: Re-entering LLM stream with optical data...")
+            # We feed the perceived data back into the LLM context silently
+            self.agent.handle_voice_input(
+                f"[System Internal Context - User's screen shows]: {res}\n"
+                "Explain the issue briefly and provide the fix, or execute it if you can."
+            )
 
 
 class StreamingAgent:
@@ -244,7 +250,7 @@ class StreamingAgent:
     """
     def __init__(self, context_engine=None, behavior_engine=None):
         self.audio = DuplexAudioEngine()
-        self.interceptor = ToolInterceptor()
+        self.interceptor = ToolInterceptor(agent=self)
         self.context = context_engine if context_engine else ContextEngine()
         self.behavior = behavior_engine if behavior_engine else BehavioralEngine()
         self.emotion = EmotionEngine()
