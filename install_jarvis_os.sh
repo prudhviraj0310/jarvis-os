@@ -106,9 +106,9 @@ pacstrap -K /mnt \
     networkmanager \
     git wget curl vim nano sudo \
     grub efibootmgr \
-    hyprland xdg-desktop-portal-hyprland \
-    kitty waybar wofi mako \
-    grim slurp wl-clipboard \
+    wayland hyprland waybar kitty ttf-jetbrains-mono-nerd rofi mako libnotify \
+    pipewire pipewire-pulse wireplumber espeak-ng xdg-desktop-portal-hyprland \
+    polkit-kde-agent qt5-wayland qt6-wayland xdotool xprintidle playerctl grim slurp wl-clipboard \
     firefox thunar \
     pipewire pipewire-pulse pipewire-alsa wireplumber \
     espeak-ng libnotify \

@@ -69,7 +69,8 @@ if ! command -v ollama &>/dev/null; then
     systemctl enable --now ollama 2>/dev/null || true
     sleep 3
     ollama pull llama3 &
-    log "  Ollama installed. Pulling llama3 in background."
+    ollama pull llava &
+    log "  Ollama installed. Pulling llama3 and llava in background (vision + logic)."
 fi
 
 # Vosk model (offline speech recognition)

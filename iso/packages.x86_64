@@ -61,5 +61,8 @@ libnotify
 gtk4
 gtk4-layer-shell
 ttf-jetbrains-mono
+playerctl
+grim
+slurp
 
 # We install Ollama, Vosk, Sounddevice via pip/script during firstboot or install.
