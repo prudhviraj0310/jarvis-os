@@ -32,7 +32,7 @@ class ScreenAwarenessLayer:
 
     def analyze_screen(self, prompt: str = "Describe what is on this screen briefly. If there is an error, read it.") -> str:
         """
-        True Pixel Vision Integration (Llava).
+        True Pixel Vision Integration (Llava / OpenAI).
         Captures the screen and uses a Vision Language Model to read and interpret it.
         """
         capture_path = self.capture_screen()
@@ -43,6 +43,36 @@ class ScreenAwarenessLayer:
             with open(capture_path, "rb") as img_file:
                 b64_image = base64.b64encode(img_file.read()).decode('utf-8')
                 
+            # Attempt to use OpenAI if configured
+            try:
+                from jarvis.core.config import ConfigManager
+                import openai
+                cfg = ConfigManager()
+                if cfg.openai_key:
+                    print("[VisionEngine] Using Cloud Vision (OpenAI gpt-4o-mini)...")
+                    client = openai.OpenAI(api_key=cfg.openai_key)
+                    response = client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[
+                            {
+                                "role": "user",
+                                "content": [
+                                    {"type": "text", "text": prompt},
+                                    {
+                                        "type": "image_url",
+                                        "image_url": {"url": f"data:image/png;base64,{b64_image}"}
+                                    }
+                                ]
+                            }
+                        ],
+                        max_tokens=300
+                    )
+                    return response.choices[0].message.content
+            except ImportError:
+                pass
+
+            # Fallback to Local Ollama Llava
+            print("[VisionEngine] Using Local Vision (Ollama llava)...")
             payload = {
                 "model": "llava",
                 "prompt": prompt,

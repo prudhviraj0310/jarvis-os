@@ -23,7 +23,7 @@ from jarvis.engine.behavior import BehavioralEngine
 from jarvis.engine.thought import ThoughtEngine
 from jarvis.engine.energy import EnergyEngine
 from jarvis.interface.overlay import OverlayEngine
-
+from jarvis.core.config import ConfigManager
 
 class DuplexAudioEngine:
     """
@@ -252,17 +252,41 @@ class StreamingAgent:
         self.thoughts = ThoughtEngine()
         self.energy = EnergyEngine()
         self.hud = OverlayEngine()
+        self.config = ConfigManager()
         
-        # Real LLM integration via Ollama
-        self._ollama_available = False
+        # Real LLM integration via OpenAI SDK (Supports Groq, OpenAI, Local Ollama)
+        self._client = None
+        self._provider = "fallback"
+        self._model = ""
+        
         try:
-            import ollama as _ollama
-            self._ollama = _ollama
-            self._ollama_available = True
-            self._model = "llama3"
-            print("[StreamingAgent] Ollama LLM backend connected.")
+            import openai
+            if self.config.groq_key:
+                self._client = openai.OpenAI(api_key=self.config.groq_key, base_url="https://api.groq.com/openai/v1")
+                self._provider = "groq"
+                self._model = "llama-3.3-70b-versatile"
+                print(f"[StreamingAgent] Connected to Cloud Engine ({self._provider}) - Instant Latency.")
+            elif self.config.openai_key:
+                self._client = openai.OpenAI(api_key=self.config.openai_key)
+                self._provider = "openai"
+                self._model = "gpt-4o-mini"
+                print(f"[StreamingAgent] Connected to Cloud Engine ({self._provider}).")
+            else:
+                # Local Ollama fallback via OpenAI SDK
+                self._client = openai.OpenAI(api_key="none", base_url="http://localhost:11434/v1")
+                self._provider = "ollama"
+                self._model = "llama3"
+                print(f"[StreamingAgent] Connected to Local OS Engine ({self._provider}).")
         except ImportError:
-            print("[StreamingAgent] Ollama not installed. LLM will use fallback responses.")
+            try:
+                import ollama as _ollama
+                self._ollama = _ollama
+                self._provider = "ollama_native"
+                self._model = "llama3"
+                print("[StreamingAgent] Connected to Local OS Engine (ollama-native).")
+            except ImportError:
+                print("[StreamingAgent] No LLM SDKs installed. Running in mock fallback mode.")
+
 
     def start(self):
         self.audio.start()
@@ -338,30 +362,28 @@ class StreamingAgent:
         tone = self.thoughts.profile.data.get("tone", "adaptive")
         
         # ═══════════════════════════════════════════════════════
-        # REAL OLLAMA STREAMING PATH
+        # REAL LLM STREAMING PATH
         # ═══════════════════════════════════════════════════════
-        if self._ollama_available:
+        if self._provider != "fallback":
             try:
-                self._stream_from_ollama(user_text, context, current_emotion, spoken_thought, tone, energy)
+                self._stream_from_llm(user_text, context, current_emotion, spoken_thought, tone, energy)
                 return
             except Exception as e:
                 print(f"\n[StreamingAgent] LLM streaming failed: {e}. Using fallback.")
         
         # ═══════════════════════════════════════════════════════
-        # FALLBACK STATIC RESPONSE (only if Ollama unavailable)
+        # FALLBACK STATIC RESPONSE (only if SDKs unavailable)
         # ═══════════════════════════════════════════════════════
         self._fallback_response(user_text, current_emotion, spoken_thought, tone, energy)
 
-    def _stream_from_ollama(self, user_text: str, context: dict, emotion: str, spoken_thought: str, tone: str, energy: float):
+    def _stream_from_llm(self, user_text: str, context: dict, emotion: str, spoken_thought: str, tone: str, energy: float):
         """
-        Real streaming LLM call via Ollama.
+        Real streaming LLM call via OpenAI SDK (Groq/OpenAI/Ollama).
         Tokens are streamed to stdout and piped through the ToolInterceptor in real time.
         """
-        # Build the internal monologue for the prompt
         thoughts_dict = self.thoughts.generate_thoughts(user_text, context)
         internal_monologue = self.thoughts.format_for_prompt(thoughts_dict)
         
-        # Build a focused system prompt
         system_prompt = f"""You are Jarvis, an AI operating system assistant running natively on Linux.
 You are concise, direct, and efficient. No emojis. No filler. Execute intent.
 Tone: {"casual and warm" if tone == "casual" else "professional and precise"}.
@@ -377,45 +399,61 @@ If the user asks you to read the screen or fix a visual error, embed: <call:visi
 Always respond conversationally first, then embed the tool call if action is needed.
 Keep responses under 2 sentences unless the user explicitly asks for detail."""
 
-        # Stream from Ollama
         full_response = ""
-        stream = self._ollama.chat(
-            model=self._model,
-            messages=[
-                {'role': 'system', 'content': system_prompt},
-                {'role': 'user', 'content': user_text}
-            ],
-            stream=True,
-            options={'temperature': 0.3}
-        )
         
-        has_tool_call = False
-        for chunk in stream:
-            token = chunk['message']['content']
-            full_response += token
-            
-            # Send through Interceptor BEFORE TTS
-            clean_text = self.interceptor.process_chunk(token)
-            
-            if clean_text.strip():
-                if "<call:" in clean_text:
-                    has_tool_call = True
-                    self.hud.executing()
-                else:
-                    print(clean_text, end="", flush=True)
+        # Standard OpenAI SDK Stream
+        if self._client:
+            stream = self._client.chat.completions.create(
+                model=self._model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_text}
+                ],
+                stream=True,
+                temperature=0.3
+            )
+            for chunk in stream:
+                if chunk.choices[0].delta.content:
+                    token = chunk.choices[0].delta.content
+                    full_response += token
+                    self._process_stream_token(token)
+                    
+        elif self._provider == "ollama_native":
+            stream = self._ollama.chat(
+                model=self._model,
+                messages=[
+                    {'role': 'system', 'content': system_prompt},
+                    {'role': 'user', 'content': user_text}
+                ],
+                stream=True,
+                options={'temperature': 0.3}
+            )
+            for chunk in stream:
+                token = chunk['message']['content']
+                full_response += token
+                self._process_stream_token(token)
+
+        self._flush_stream()
         
-        # Flush interceptor buffer
+        # Record to profile
+        self.thoughts.profile.update(user_text, {"active_app": "terminal"})
+        self.hud.success()
+
+    def _process_stream_token(self, token: str):
+        clean_text = self.interceptor.process_chunk(token)
+        if clean_text.strip():
+            if "<call:" in clean_text:
+                self.hud.executing()
+            else:
+                print(clean_text, end="", flush=True)
+
+    def _flush_stream(self):
         final_text = self.interceptor.process_chunk("\n")
         if final_text.strip():
             if "<call:" not in final_text:
                 print(final_text, end="", flush=True)
-        print()  # Newline
-        
-        # Record to profile
-        self.thoughts.profile.update(user_text, {"active_app": "terminal"})
-        
-        # Phase Z: Success HUD
-        self.hud.success()
+        print()
+
 
     def _fallback_response(self, user_text: str, emotion: str, spoken_thought: str, tone: str, energy: float):
         """

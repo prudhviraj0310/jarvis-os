@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install Python deps
 COPY requirements.txt* ./
-RUN pip install --no-cache-dir psutil requests ollama 2>/dev/null || true
+RUN pip install --no-cache-dir psutil requests ollama openai python-dotenv sounddevice numpy faster-whisper piper-tts 2>/dev/null || true
 
 # Copy project
 COPY . .
