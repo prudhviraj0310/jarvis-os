@@ -3,6 +3,7 @@ import threading
 import time
 from enum import Enum
 import os
+import urllib.request
 
 class Priority(Enum):
     ROUTINE = 0
@@ -12,14 +13,24 @@ class Priority(Enum):
 class VoiceEngine:
     """
     Cinematic Voice Interface for Jarvis OS.
+    Upgraded to Phase B: Piper TTS for ultra-realistic neural speech.
     Features voice fatigue tokenization and priority-based filtering.
     """
     def __init__(self):
-        # Settings: Pitch 35 (Deep), Speed 165 (Fast/Cold)
-        self.espeak_args = ["espeak", "-v", "en-us", "-s", "165", "-p", "35"]
+        self.models_dir = os.path.join(os.path.dirname(__file__), "..", "..", "models")
+        os.makedirs(self.models_dir, exist_ok=True)
+        
+        # We use a default ONNX model from Piper
+        self.model_name = "en_US-lessac-medium.onnx"
+        self.model_path = os.path.join(self.models_dir, self.model_name)
+        self.json_path = self.model_path + ".json"
+        
+        self.ensure_model_downloaded()
+        
+        # Command to pipe text into piper, then to aplay
+        self.piper_bin = "piper"  # installed via pip install piper-tts
         
         # Fatigue Tokenizer (max 6 sentences per minute)
-        # We store timestamps of recent voice events.
         self.history = []
         self.MAX_EVENTS_PER_MIN = 6
         
@@ -27,15 +38,40 @@ class VoiceEngine:
         self.assets_dir = os.path.join(os.path.dirname(__file__), "..", "assets")
         os.makedirs(self.assets_dir, exist_ok=True)
         
+    def ensure_model_downloaded(self):
+        """Downloads the ONNX voice model if it's missing (First boot)."""
+        if not os.path.exists(self.model_path) or not os.path.exists(self.json_path):
+            print("[VoiceEngine] Downloading Neural Voice Model (~50MB)...")
+            base_url = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/"
+            try:
+                urllib.request.urlretrieve(base_url + self.model_name, self.model_path)
+                urllib.request.urlretrieve(base_url + self.model_name + ".json", self.json_path)
+                print("[VoiceEngine] Voice model installed successfully.")
+            except Exception as e:
+                print(f"[VoiceEngine] Failed to download voice model: {e}")
+
     def _cull_history(self):
         current_time = time.time()
         self.history = [t for t in self.history if current_time - t < 60]
 
-    def _run_espeak(self, text: str):
+    def _run_piper(self, text: str):
         try:
-            subprocess.Popen(self.espeak_args + [text], stderr=subprocess.DEVNULL)
-        except FileNotFoundError:
-            pass
+            # We pipe the string into Piper, which outputs raw PCM audio, which we pipe into aplay
+            # aplay -r 22050 -f S16_LE -t raw -
+            piper_cmd = [self.piper_bin, "-m", self.model_path, "--output-raw"]
+            
+            p1 = subprocess.Popen(["echo", text], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            p2 = subprocess.Popen(piper_cmd, stdin=p1.stdout, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            p1.stdout.close() 
+            
+            aplay_cmd = ["aplay", "-r", "22050", "-f", "S16_LE", "-t", "raw", "-"]
+            p3 = subprocess.Popen(aplay_cmd, stdin=p2.stdout, stderr=subprocess.DEVNULL)
+            p2.stdout.close()
+            p3.communicate()
+            
+        except OSError:
+            # Fallback to espeak if piper or aplay fails
+            subprocess.Popen(["espeak", "-v", "en-us", text], stderr=subprocess.DEVNULL)
 
     def can_speak(self, priority: Priority = Priority.ROUTINE) -> bool:
         """
@@ -52,27 +88,28 @@ class VoiceEngine:
         return True
 
     def consume_fatigue_token(self):
-        """Deducts a token when an external streaming engine speaks."""
         self.history.append(time.time())
 
     def speak(self, text: str, priority: Priority = Priority.ROUTINE):
         """
-        Legacy static TTS. Conditionally speaks text based on priority and fatigue tokens.
-        Consider using VoiceStream's DuplexAudioEngine for real-time interactions.
+        Ultra-realistic TTS. Conditionally speaks text based on priority and fatigue tokens.
         """
         if not self.can_speak(priority):
             return
                 
-        # Critical bypasses fatigue checks OR Assist passed fatigue checks
         self.consume_fatigue_token()
-        t = threading.Thread(target=self._run_espeak, args=(text,), daemon=True)
+        
+        # Notify HUD of speaking state
+        try:
+            from jarvis.interface.overlay import OverlayEngine
+            OverlayEngine().speaking(text)
+        except Exception:
+            pass
+            
+        t = threading.Thread(target=self._run_piper, args=(text,), daemon=True)
         t.start()
 
     def play_cue(self, cue_name: str):
-        """
-        Plays a high-fidelity micro sound via ALSA aplay.
-        Expected files: listening.wav, success.wav, error.wav
-        """
         wav_path = os.path.join(self.assets_dir, f"{cue_name}.wav")
         if os.path.exists(wav_path):
             try:

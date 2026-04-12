@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-04-12T11:49:54",
+  "timestamp": "2026-04-12T12:07:27",
   "total": 58,
   "passed": 58,
   "failed": 0,
-  "avg_latency_us": 1094.7,
-  "max_latency_us": 30203.4,
+  "avg_latency_us": 1099.2,
+  "max_latency_us": 30699.8,
   "results": [
     {
       "module": "EmotionEngine",
       "test": "Fatigue detection",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 2.4,
+      "latency_\u03bcs": 2.5,
       "detail": "Input: 'I'm so tired bro' \u2192 low_energy"
     },
     {
       "module": "EmotionEngine",
       "test": "Urgency detection",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.9,
+      "latency_\u03bcs": 2.2,
       "detail": "Input: 'do it now, fast!' \u2192 urgent"
     },
     {
       "module": "EmotionEngine",
       "test": "Casual tone pick-up",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.9,
+      "latency_\u03bcs": 2.1,
       "detail": "Input: 'hey bro open youtube' \u2192 casual"
     },
     {
       "module": "EmotionEngine",
       "test": "Neutral baseline",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 2.0,
+      "latency_\u03bcs": 2.2,
       "detail": "Input: 'open the terminal' \u2192 neutral"
     },
     {
@@ -45,28 +45,28 @@
       "module": "EmotionEngine",
       "test": "Multi-keyword urgency",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.3,
+      "latency_\u03bcs": 1.4,
       "detail": "Input: 'hurry up immediately' \u2192 urgent"
     },
     {
       "module": "EmotionEngine",
       "test": "Voice params [low_energy]",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 0.7,
+      "latency_\u03bcs": 0.8,
       "detail": "{\"speed\": 0.85, \"pitch_shift\": -1, \"prefix_filler\": \"Got it\\u2026 take it easy. \"}"
     },
     {
       "module": "EmotionEngine",
       "test": "Voice params [urgent]",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 0.7,
+      "latency_\u03bcs": 0.8,
       "detail": "{\"speed\": 1.25, \"pitch_shift\": 1, \"prefix_filler\": \"On it. \"}"
     },
     {
       "module": "EmotionEngine",
       "test": "Voice params [casual]",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 0.5,
+      "latency_\u03bcs": 0.7,
       "detail": "{\"speed\": 1.05, \"pitch_shift\": 0, \"prefix_filler\": \"Done, boss. \"}"
     },
     {
@@ -80,70 +80,70 @@
       "module": "EmotionEngine",
       "test": "Filler injection (casual)",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.1,
+      "latency_\u03bcs": 1.3,
       "detail": "Output: 'Done, boss. Opening YouTube.'"
     },
     {
       "module": "ThoughtEngine",
       "test": "Media intent classification",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 4.1,
+      "latency_\u03bcs": 4.2,
       "detail": "['User likely wants media playback.']"
     },
     {
       "module": "ThoughtEngine",
       "test": "Developer intent classification",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 2.1,
+      "latency_\u03bcs": 2.3,
       "detail": "['User is in developer mode. Favor terminal/editor actions.']"
     },
     {
       "module": "ThoughtEngine",
       "test": "Vision bounding box injection",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 5.6,
+      "latency_\u03bcs": 5.2,
       "detail": "['Screen currently active with 2 recognized bounding boxes.', 'Identified standard form interactions on screen.']"
     },
     {
       "module": "ThoughtEngine",
       "test": "Empty intent (no crash)",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.5,
+      "latency_\u03bcs": 1.6,
       "detail": "{}"
     },
     {
       "module": "ThoughtEngine",
       "test": "Prompt formatting structure",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 2.4,
+      "latency_\u03bcs": 2.2,
       "detail": "Length: 70 chars"
     },
     {
       "module": "EnergyEngine",
       "test": "Active user, browser",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 3.3,
+      "latency_\u03bcs": 3.5,
       "detail": "Energy = 0.70"
     },
     {
       "module": "EnergyEngine",
       "test": "Idle user, browser",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.5,
+      "latency_\u03bcs": 1.9,
       "detail": "Energy = 1.00"
     },
     {
       "module": "EnergyEngine",
       "test": "Active user, VSCode (focus)",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.4,
+      "latency_\u03bcs": 1.5,
       "detail": "Energy = 0.20"
     },
     {
       "module": "EnergyEngine",
       "test": "Night + VSCode + Low Energy",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.2,
+      "latency_\u03bcs": 1.3,
       "detail": "Energy = 0.00"
     },
     {
@@ -157,42 +157,42 @@
       "module": "EnergyEngine",
       "test": "Mildly idle, desktop",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.2,
+      "latency_\u03bcs": 1.3,
       "detail": "Energy = 1.00"
     },
     {
       "module": "EnergyEngine",
       "test": "Cooldown blocks rapid fire",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 0.9,
+      "latency_\u03bcs": 1.0,
       "detail": "Gate = False"
     },
     {
       "module": "EnergyEngine",
       "test": "Cooldown expired allows proactive",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 2.0,
+      "latency_\u03bcs": 2.1,
       "detail": "Gate = True"
     },
     {
       "module": "UserProfile",
       "test": "Track 7 YouTube intents",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 954.0,
+      "latency_\u03bcs": 557.9,
       "detail": "Count: {'youtube': 7}"
     },
     {
       "module": "UserProfile",
       "test": "Prefers youtube (>5 threshold)",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 0.9,
+      "latency_\u03bcs": 0.8,
       "detail": "prefers = True"
     },
     {
       "module": "UserProfile",
       "test": "Top app is chrome",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.7,
+      "latency_\u03bcs": 1.2,
       "detail": "top_app = 'chrome'"
     },
     {
@@ -206,42 +206,42 @@
       "module": "UserProfile",
       "test": "Persists to disk and reloads",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 54.4,
+      "latency_\u03bcs": 43.0,
       "detail": ""
     },
     {
       "module": "MemPalace",
       "test": "Commit success writes to drawer",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 142.5,
+      "latency_\u03bcs": 122.1,
       "detail": ""
     },
     {
       "module": "MemPalace",
       "test": "Query retrieves matching pattern",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 36.0,
-      "detail": "{'historical_pattern': {'timestamp': 1775974794.0544279, 'time_of_day': 'morning"
+      "latency_\u03bcs": 41.7,
+      "detail": "{'historical_pattern': {'timestamp': 1775975846.920981, 'time_of_day': 'afternoo"
     },
     {
       "module": "MemPalace",
       "test": "Knowledge storage",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 227.4,
+      "latency_\u03bcs": 115.3,
       "detail": ""
     },
     {
       "module": "MemPalace",
       "test": "Knowledge retrieval",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 32.6,
+      "latency_\u03bcs": 33.0,
       "detail": "Use list comprehensions for performance."
     },
     {
       "module": "MemPalace",
       "test": "GC purges via summarization",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 130.0,
+      "latency_\u03bcs": 124.0,
       "detail": "Remaining: 0"
     },
     {
@@ -255,56 +255,56 @@
       "module": "ReflectionEngine",
       "test": "ExecutionLogger writes JSONL",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 187.2,
+      "latency_\u03bcs": 227.2,
       "detail": ""
     },
     {
       "module": "ReflectionEngine",
       "test": "Log entries parseable",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 43.4,
+      "latency_\u03bcs": 36.5,
       "detail": "Entries: 2"
     },
     {
       "module": "ReflectionEngine",
       "test": "Circuit breaker triggers on 3+ failures",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 58.0,
+      "latency_\u03bcs": 51.7,
       "detail": ""
     },
     {
       "module": "CodeEvolver",
       "test": "Sandbox writes temp file",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 332.0,
+      "latency_\u03bcs": 122.0,
       "detail": ""
     },
     {
       "module": "CodeEvolver",
       "test": "Valid module passes syntax check",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 30203.4,
+      "latency_\u03bcs": 30699.8,
       "detail": ""
     },
     {
       "module": "CodeEvolver",
       "test": "Invalid module caught by sandbox",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 26701.3,
+      "latency_\u03bcs": 27433.0,
       "detail": ""
     },
     {
       "module": "CodeEvolver",
       "test": "Evolution lock blocks modification",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 5.4,
+      "latency_\u03bcs": 5.0,
       "detail": ""
     },
     {
       "module": "CodeEvolver",
       "test": "Forbidden file rejected",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 5.0,
+      "latency_\u03bcs": 5.5,
       "detail": ""
     },
     {
@@ -318,98 +318,98 @@
       "module": "VisionEngine",
       "test": "Capture returns valid path",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 4.2,
+      "latency_\u03bcs": 2.3,
       "detail": ""
     },
     {
       "module": "VisionEngine",
       "test": "OCR produces bounding boxes",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 2.5,
+      "latency_\u03bcs": 1.1,
       "detail": "Found: 0 regions"
     },
     {
       "module": "VisionEngine",
       "test": "Full perception pipeline",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.8,
+      "latency_\u03bcs": 1.2,
       "detail": "Objects: 0"
     },
     {
       "module": "OverlayEngine",
       "test": "HUD state [listening] (no crash)",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1906.8,
+      "latency_\u03bcs": 1802.9,
       "detail": ""
     },
     {
       "module": "OverlayEngine",
       "test": "HUD state [processing] (no crash)",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 7.0,
+      "latency_\u03bcs": 4.7,
       "detail": ""
     },
     {
       "module": "OverlayEngine",
       "test": "HUD state [executing] (no crash)",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.7,
+      "latency_\u03bcs": 0.8,
       "detail": ""
     },
     {
       "module": "OverlayEngine",
       "test": "HUD state [success] (no crash)",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1013.0,
+      "latency_\u03bcs": 983.8,
       "detail": ""
     },
     {
       "module": "OverlayEngine",
       "test": "HUD state [warning] (no crash)",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1027.3,
+      "latency_\u03bcs": 1013.4,
       "detail": ""
     },
     {
       "module": "BehavioralEngine",
       "test": "Recognizes repeated pattern",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 68.7,
+      "latency_\u03bcs": 56.5,
       "detail": "Confidence: 1.0"
     },
     {
       "module": "BehavioralEngine",
       "test": "Should suggest (above threshold)",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 22.5,
+      "latency_\u03bcs": 18.6,
       "detail": "{'prediction': ['xdg-open https://youtube.com'], 'confidence': 1.0, 'should_suggest': True, 'should_auto_exec': True}"
     },
     {
       "module": "BehavioralEngine",
       "test": "Empty history returns safely",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.1,
+      "latency_\u03bcs": 1.0,
       "detail": ""
     },
     {
       "module": "IdentityCore",
       "test": "Produces system prompt header",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 1.8,
+      "latency_\u03bcs": 1.6,
       "detail": "Identity: Jarvis | Directives: efficient, loyal, proactive, "
     },
     {
       "module": "IdentityCore",
       "test": "Persists identity to disk",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 139.4,
+      "latency_\u03bcs": 96.2,
       "detail": ""
     },
     {
       "module": "IdentityCore",
       "test": "Dataset collector stores interaction",
       "status": "\u2705 PASS",
-      "latency_\u03bcs": 137.9,
+      "latency_\u03bcs": 103.0,
       "detail": ""
     }
   ]

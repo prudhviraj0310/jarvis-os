@@ -55,10 +55,10 @@ waybar &
 # ═══════════════════════════════════════════════════════
 
 # Python packages
-if ! python3 -c "import vosk" 2>/dev/null; then
+if ! python3 -c "import faster_whisper" 2>/dev/null; then
     log "Phase 3: First boot — installing Python deps..."
     pip install --break-system-packages vosk sounddevice psutil \
-        pytesseract Pillow mss requests 2>>"$LOG_DIR/pip.log" || true
+        pytesseract Pillow mss requests faster-whisper piper-tts onnxruntime 2>>"$LOG_DIR/pip.log" || true
 fi
 
 # Ollama (AI backend)

@@ -7,6 +7,8 @@ from jarvis.interface.listener import WakeWordEngine
 from jarvis.engine.autonomous import AutonomousEngine
 from jarvis.engine.context import ContextEngine
 from jarvis.engine.behavior import BehavioralEngine
+from jarvis.interface.active_listener import ActiveSessionEngine
+
 
 class ContinuousAwarenessLoop:
     """
@@ -28,34 +30,64 @@ class ContinuousAwarenessLoop:
         # Giving it a reference to VoiceStream allows it to speak unprompted
         self.auto_engine = AutonomousEngine(voice_stream=self.agent)
         
-        # 3. Boot Passive Listener (Hooking into Duplex shared queue ideally)
-        # Note: If no shared queue is provided, it falls back to standalone mic read
-        # depending on ALSA config. We mock the handler block.
+        # 3. Boot Passive Listener
         self.listener = WakeWordEngine(callback=self.on_wake_event, shared_input_queue=getattr(self.agent.audio, "input_queue", None))
+        
+        # 4. Boot Active Session Engine (Phase B integration)
+        self.active_session = ActiveSessionEngine(callback=self.on_active_intent, on_close=self.on_session_timeout)
+        self._in_session = False
 
     def on_wake_event(self, intent_string: str):
         """
-        Triggered asynchronously when the user speaks Jarvis's name or a command.
+        Triggered asynchronously when the user speaks Jarvis's name.
+        Transitions system from passive listening into Active Conversation Session.
         """
-        # 1. Global Kill Switch (Phase X)
         if "jarvis stop everything" in intent_string.lower():
             print("[Presence Loop] 🚨 GLOBAL KILL SWITCH ACTIVATED 🚨")
             self.auto_engine.guard.cancel_all()
-            self._global_shutdown = True # We need a flag for the main while loop
+            self._global_shutdown = True
             return
             
-        # Immediately halt any autonomous sequences executing erroneously
         self.auto_engine.guard.cancel_all()
         
         if intent_string.lower() == "stop":
-            # Just an interruption, do nothing.
             return
             
-        print(f"\n[Presence Loop] Heard Intent: {intent_string}")
+        print(f"\n[Presence Loop] Heard Wake Word/Intent: {intent_string}")
         
-        # Pass the intent into the high-speed streaming LLM cycle
-        # The agent will handle Context Enrichment L1-L3, Emotion matching, and Tool routing
+        # Suspend passive wake word listener
+        self.listener.stop()
+        self._in_session = True
+        
+        # If the user included a command with the wake word (e.g. "Jarvis open firefox")
+        if intent_string != "System Wake":
+            self.agent.handle_voice_input(intent_string)
+            
+        # Enter Continuous Active Session loop
+        self.active_session.start()
+
+    def on_active_intent(self, intent_string: str):
+        """
+        Triggered repeatedly during an Active Session via fast-whisper.
+        """
+        if "sleep jarvis" in intent_string.lower() or "goodbye" in intent_string.lower() or "go back to sleep" in intent_string.lower():
+            print("[Presence Loop] Manually closing active session.")
+            self.active_session.stop()
+            self.on_session_timeout()
+            return
+            
+        print(f"[Presence Loop] Active Command Received: {intent_string}")
+        # Send right to the agent
         self.agent.handle_voice_input(intent_string)
+
+    def on_session_timeout(self):
+        """
+        Triggered when 10 seconds of silence elapse in an Active Session.
+        Resumes passive wake word monitoring.
+        """
+        print("[Presence Loop] Active Session Complete. Resuming passive monitoring.")
+        self._in_session = False
+        self.listener.start()
 
     def start(self):
         """

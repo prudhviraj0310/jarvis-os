@@ -346,7 +346,7 @@ mkdir -p /var/lib/jarvis
 chown -R jarvis:jarvis /var/lib/jarvis
 
 # ── Install Python dependencies ──
-pip install --break-system-packages psutil crewai langchain playwright 2>/dev/null || true
+pip install --break-system-packages psutil crewai langchain playwright faster-whisper piper-tts onnxruntime 2>/dev/null || true
 playwright install --with-deps chromium 2>/dev/null || true
 
 CHROOT_END
