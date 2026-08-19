@@ -1,0 +1,4 @@
+endpoint JournalClient
+{
+    entry_appended(u64 sequence_number, String block_hash) =|
+}

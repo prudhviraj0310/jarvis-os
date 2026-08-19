@@ -1,0 +1,4 @@
+endpoint JarvisClient
+{
+    world_state_changed(String event_type, String state_json) =|
+}

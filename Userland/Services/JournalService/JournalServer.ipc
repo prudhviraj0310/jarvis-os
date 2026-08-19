@@ -1,0 +1,6 @@
+endpoint JournalServer
+{
+    append_entry(String actor, String capability_name, String arguments_json, String result_json) => (bool success, u64 sequence_number, String block_hash)
+    get_latest_block() => (u64 sequence_number, String block_hash)
+    get_journal_count() => (u64 count)
+}

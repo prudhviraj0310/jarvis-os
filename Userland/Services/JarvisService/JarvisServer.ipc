@@ -1,0 +1,6 @@
+endpoint JarvisServer
+{
+    request_capability(String capability_name, String arguments_json, String request_id) => (bool accepted, String response_json)
+    get_system_health() => (String health_json)
+    query_policy(String capability_name) => (bool is_allowed, String policy_level)
+}
