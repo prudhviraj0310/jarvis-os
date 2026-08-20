@@ -1,13 +1,13 @@
 @JarvisAssistant::JarvisAssistantWidget {
     fill_with_background_color: true
     layout: @GUI::VerticalBoxLayout {
-        margins: [16]
-        spacing: 12
+        margins: [12]
+        spacing: 8
     }
 
     @GUI::GroupBox {
         title: "⚡ JARVIS OS — HOLOGRAPHIC TACTICAL COMMAND MATRIX"
-        preferred_height: 50
+        preferred_height: 48
         layout: @GUI::HorizontalBoxLayout {
             margins: [8]
             spacing: 12
@@ -15,38 +15,38 @@
 
         @GUI::Label {
             name: "status_label"
-            text: "KERNEL: JARVIS OS 1.0 (Foundation) | CPU: ACTIVE | MEM: NOMINAL"
+            text: "KERNEL: JARVIS OS 1.0 (64-bit) | CPU: ACTIVE | MEMORY: NOMINAL"
             text_alignment: "CenterLeft"
         }
 
         @GUI::Label {
             name: "shield_label"
-            text: "ULTIMATE SHIELD: 100% | DEFCON: NOMINAL"
+            text: "ULTIMATE SHIELD: ACTIVE (100%) | DEFCON: NOMINAL"
             text_alignment: "CenterRight"
         }
     }
 
     @GUI::Widget {
         layout: @GUI::HorizontalBoxLayout {
-            spacing: 12
+            spacing: 10
         }
 
         @GUI::GroupBox {
-            title: "Tactical Protocols & Sentry"
-            preferred_width: 240
+            title: "Tactical Protocols"
+            preferred_width: 220
             layout: @GUI::VerticalBoxLayout {
                 margins: [8]
-                spacing: 8
+                spacing: 6
             }
 
             @GUI::Button {
                 name: "btn_diag"
-                text: "⚡ Full System Diagnostics"
+                text: "⚡ System Diagnostics"
             }
 
             @GUI::Button {
                 name: "btn_shield"
-                text: "🛡️ Ultimate Shield Perimeter"
+                text: "🛡️ Ultimate Shield ON"
             }
 
             @GUI::Button {
@@ -56,26 +56,69 @@
 
             @GUI::Button {
                 name: "btn_journal"
-                text: "📜 SHA-256 Crypto Journal"
+                text: "📜 SHA-256 Crypto Log"
             }
 
-            @GUI::Label {
-                name: "ipc_label"
-                text: "IPC: /tmp/portal/jarvis\nMode: Fullscreen HUD"
-                text_alignment: "Center"
+            @GUI::Button {
+                name: "btn_mem"
+                text: "🔍 Kernel Memory Scan"
+            }
+
+            @GUI::Button {
+                name: "btn_who"
+                text: "🌐 JARVIS Identity"
             }
         }
 
-        @JarvisAssistant::ArcReactorWidget {
-            name: "arc_reactor_widget"
+        @GUI::Widget {
+            layout: @GUI::VerticalBoxLayout {
+                spacing: 6
+            }
+
+            @JarvisAssistant::ArcReactorWidget {
+                name: "arc_reactor_widget"
+                preferred_height: 230
+            }
+
+            @GUI::Widget {
+                preferred_height: 30
+                layout: @GUI::HorizontalBoxLayout {
+                    spacing: 6
+                }
+
+                @GUI::Button {
+                    name: "chip_status"
+                    text: "📊 Status"
+                }
+
+                @GUI::Button {
+                    name: "chip_shield"
+                    text: "🛡️ Shield"
+                }
+
+                @GUI::Button {
+                    name: "chip_diag"
+                    text: "⚡ Diag"
+                }
+
+                @GUI::Button {
+                    name: "chip_lockdown"
+                    text: "🔒 Lockdown"
+                }
+
+                @GUI::Button {
+                    name: "chip_identity"
+                    text: "🤖 Identity"
+                }
+            }
         }
 
         @GUI::GroupBox {
-            title: "Threat & Telemetry Vectors"
-            preferred_width: 240
+            title: "Defense & Threat Vectors"
+            preferred_width: 220
             layout: @GUI::VerticalBoxLayout {
                 margins: [8]
-                spacing: 6
+                spacing: 4
             }
 
             @GUI::Label {
@@ -102,12 +145,17 @@
                 text: "Voice Matrix: ENGAGED"
                 text_alignment: "CenterLeft"
             }
+
+            @GUI::Label {
+                text: "IPC: /tmp/portal/jarvis"
+                text_alignment: "CenterLeft"
+            }
         }
     }
 
     @GUI::GroupBox {
         title: "Neural Voice & Cognitive Command Console"
-        preferred_height: "shrink"
+        preferred_height: 48
         layout: @GUI::HorizontalBoxLayout {
             margins: [8]
             spacing: 8
@@ -115,19 +163,19 @@
 
         @GUI::Button {
             name: "voice_button"
-            text: "🎙️ Voice"
-            fixed_width: 90
+            text: "🎙️ Wake JARVIS"
+            fixed_width: 130
         }
 
         @GUI::TextBox {
             name: "capability_input"
-            placeholder: "Speak or type voice command (status, shield, processes, lockdown, memory)..."
+            placeholder: "Speak or type command (status, shield, lockdown, diagnostics, memory, who are you)..."
         }
 
         @GUI::Button {
             name: "execute_button"
             text: "Execute"
-            fixed_width: 100
+            fixed_width: 90
         }
     }
 

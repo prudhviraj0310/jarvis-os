@@ -24,8 +24,8 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
     auto app_icon = GUI::Icon::default_icon("app-terminal"sv);
 
     auto window = GUI::Window::construct();
-    window->set_title("⚡ JARVIS Holographic Cognitive HUD");
-    window->resize(800, 560);
+    window->set_title("⚡ JARVIS Holographic Tactical Command HUD");
+    window->resize(980, 680);
     window->center_on_screen();
 
     auto widget = TRY(JarvisAssistant::JarvisAssistantWidget::try_create());
