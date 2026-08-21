@@ -15,12 +15,38 @@ PolicyGate& PolicyGate::the()
 
 PolicyGate::PolicyGate()
 {
-    m_rules.set("filesystem.read"_string, PolicyTier::Allowed);
-    m_rules.set("filesystem.write"_string, PolicyTier::ConfirmRequired);
+    // Read & Informational capabilities
+    m_rules.set("system.morning_briefing"_string, PolicyTier::Allowed);
+    m_rules.set("system.whatsapp"_string, PolicyTier::Allowed);
+    m_rules.set("system.email"_string, PolicyTier::Allowed);
+    m_rules.set("system.calendar"_string, PolicyTier::Allowed);
+    m_rules.set("system.news"_string, PolicyTier::Allowed);
+    m_rules.set("system.percentage"_string, PolicyTier::Allowed);
     m_rules.set("system.processes"_string, PolicyTier::Allowed);
     m_rules.set("system.memory"_string, PolicyTier::Allowed);
-    m_rules.set("terminal.execute"_string, PolicyTier::ConfirmRequired);
+    m_rules.set("security.shield_status"_string, PolicyTier::Allowed);
+
+    m_rules.set("whatsapp.read"_string, PolicyTier::Allowed);
+    m_rules.set("whatsapp.draft"_string, PolicyTier::Allowed);
+    m_rules.set("email.read"_string, PolicyTier::Allowed);
+    m_rules.set("email.summarize"_string, PolicyTier::Allowed);
+    m_rules.set("email.draft"_string, PolicyTier::Allowed);
+    m_rules.set("calendar.list"_string, PolicyTier::Allowed);
+    m_rules.set("news.briefing"_string, PolicyTier::Allowed);
+    m_rules.set("memory.inspect"_string, PolicyTier::Allowed);
+    m_rules.set("automation.status"_string, PolicyTier::Allowed);
+    m_rules.set("action.handle_it"_string, PolicyTier::Allowed);
+    m_rules.set("filesystem.read"_string, PolicyTier::Allowed);
     m_rules.set("kernel.dmesg"_string, PolicyTier::Allowed);
+
+    // Consequential actions (Require explicit human confirmation!)
+    m_rules.set("whatsapp.send"_string, PolicyTier::ConfirmRequired);
+    m_rules.set("email.send"_string, PolicyTier::ConfirmRequired);
+    m_rules.set("calendar.add_event"_string, PolicyTier::ConfirmRequired);
+    m_rules.set("action.confirm_and_execute"_string, PolicyTier::ConfirmRequired);
+    m_rules.set("filesystem.write"_string, PolicyTier::ConfirmRequired);
+    m_rules.set("terminal.execute"_string, PolicyTier::ConfirmRequired);
+    m_rules.set("security.lockdown"_string, PolicyTier::ConfirmRequired);
 }
 
 PolicyTier PolicyGate::evaluate_capability(StringView capability_name) const

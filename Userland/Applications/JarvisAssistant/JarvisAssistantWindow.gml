@@ -6,7 +6,7 @@
     }
 
     @GUI::GroupBox {
-        title: "⚡ JARVIS OS — HOLOGRAPHIC TACTICAL COMMAND MATRIX & MORNING INTELLIGENCE"
+        title: "⚡ JARVIS OS 1.0 — DEEP PERSONAL INTELLIGENCE OPERATING SYSTEM"
         preferred_height: 48
         layout: @GUI::HorizontalBoxLayout {
             margins: [8]
@@ -15,13 +15,13 @@
 
         @GUI::Label {
             name: "status_label"
-            text: "KERNEL: JARVIS OS 1.0 | TIME: 08:00 AM | STATUS: ONLINE"
+            text: "KERNEL: JARVIS OS 1.0 | PERSONAL NERVOUS SYSTEM: ONLINE"
             text_alignment: "CenterLeft"
         }
 
         @GUI::Label {
             name: "shield_label"
-            text: "ULTIMATE SHIELD: ACTIVE (100%) | READINESS: 96%"
+            text: "SHIELD: 100% | ATTENDANCE: 87.5% (Safe Zone)"
             text_alignment: "CenterRight"
         }
     }
@@ -32,7 +32,7 @@
         }
 
         @GUI::GroupBox {
-            title: "Daily Intelligence & Protocols"
+            title: "Personal Nervous Center"
             preferred_width: 220
             layout: @GUI::VerticalBoxLayout {
                 margins: [8]
@@ -46,37 +46,37 @@
 
             @GUI::Button {
                 name: "btn_whatsapp"
-                text: "💬 WhatsApp (3 Unread)"
+                text: "💬 WhatsApp Intelligence"
             }
 
             @GUI::Button {
                 name: "btn_email"
-                text: "📬 Priority Emails (4)"
+                text: "📬 Inbox Intelligence"
             }
 
             @GUI::Button {
-                name: "btn_score"
-                text: "📊 Readiness Score (96%)"
+                name: "btn_calendar"
+                text: "📅 Calendar & Deadlines"
             }
 
             @GUI::Button {
                 name: "btn_news"
-                text: "🌍 World & Tech News"
+                text: "🌍 Clustered News"
             }
 
             @GUI::Button {
-                name: "btn_shield"
-                text: "🛡️ Ultimate Shield ON"
+                name: "btn_memory"
+                text: "🧠 Personal Memory Graph"
             }
 
             @GUI::Button {
-                name: "btn_lockdown"
-                text: "🔒 DEFCON-1 Lockdown"
+                name: "btn_handle_it"
+                text: "⚡ 'Handle It' (Propose)"
             }
 
             @GUI::Button {
-                name: "btn_diag"
-                text: "⚡ System Diagnostics"
+                name: "btn_confirm_all"
+                text: "✅ Confirm & Send All"
             }
         }
 
@@ -98,7 +98,7 @@
 
                 @GUI::Button {
                     name: "chip_briefing"
-                    text: "🌅 Briefing"
+                    text: "🌅 Brief"
                 }
 
                 @GUI::Button {
@@ -108,12 +108,12 @@
 
                 @GUI::Button {
                     name: "chip_email"
-                    text: "📬 Emails"
+                    text: "📬 Email"
                 }
 
                 @GUI::Button {
-                    name: "chip_score"
-                    text: "📈 96% Score"
+                    name: "chip_calendar"
+                    text: "📅 Agenda"
                 }
 
                 @GUI::Button {
@@ -122,28 +122,23 @@
                 }
 
                 @GUI::Button {
-                    name: "chip_shield"
-                    text: "🛡️ Shield"
+                    name: "chip_handle_it"
+                    text: "⚡ Handle It"
+                }
+
+                @GUI::Button {
+                    name: "chip_confirm"
+                    text: "✅ Confirm"
                 }
             }
         }
 
         @GUI::GroupBox {
-            title: "Personal Telemetry & Defense"
+            title: "Digital Environment Telemetry"
             preferred_width: 220
             layout: @GUI::VerticalBoxLayout {
                 margins: [8]
                 spacing: 4
-            }
-
-            @GUI::Label {
-                text: "Daily Readiness: 96% (Optimal)"
-                text_alignment: "CenterLeft"
-            }
-
-            @GUI::Label {
-                text: "Battery Power: 98% (Healthy)"
-                text_alignment: "CenterLeft"
             }
 
             @GUI::Label {
@@ -152,34 +147,44 @@
             }
 
             @GUI::Label {
-                text: "Email Feed: SYNCHRONIZED"
+                text: "Email IMAP: ACTIVE (:993)"
                 text_alignment: "CenterLeft"
             }
 
             @GUI::Label {
-                text: "Syscall Security: ENFORCED"
+                text: "Calendar Feed: SYNCHRONIZED"
                 text_alignment: "CenterLeft"
             }
 
             @GUI::Label {
-                text: "Journal State: CHAINED"
+                text: "News RSS: DEDUPLICATED"
                 text_alignment: "CenterLeft"
             }
 
             @GUI::Label {
-                text: "Core Frequency: 60 FPS"
+                text: "Personal Memory: 4 FACTS"
                 text_alignment: "CenterLeft"
             }
 
             @GUI::Label {
-                text: "Voice Matrix: ENGAGED"
+                text: "Policy Guard: SOVEREIGN"
+                text_alignment: "CenterLeft"
+            }
+
+            @GUI::Label {
+                text: "Machine Ledger: SHA-256"
+                text_alignment: "CenterLeft"
+            }
+
+            @GUI::Label {
+                text: "Voice Matrix: 44.1 kHz"
                 text_alignment: "CenterLeft"
             }
         }
     }
 
     @GUI::GroupBox {
-        title: "Neural Voice & Cognitive Intelligence Command Console"
+        title: "Cognitive Command & Voice Interface (Type or Speak)"
         preferred_height: 48
         layout: @GUI::HorizontalBoxLayout {
             margins: [8]
@@ -194,7 +199,7 @@
 
         @GUI::TextBox {
             name: "capability_input"
-            placeholder: "Speak or type (morning briefing, whatsapp, email, percentage, news, shield, lockdown)..."
+            placeholder: "Speak or type (e.g., 'morning briefing', 'handle it', 'confirm', 'whatsapp', 'email', 'calendar', 'news')..."
         }
 
         @GUI::Button {
@@ -205,8 +210,8 @@
     }
 
     @GUI::GroupBox {
-        title: "Holographic Intelligence Briefing & Execution Journal Log"
-        preferred_height: 180
+        title: "Executive Intelligence Briefing, Context Stream & Execution Journal"
+        preferred_height: 200
         layout: @GUI::VerticalBoxLayout {
             margins: [8]
             spacing: 4
