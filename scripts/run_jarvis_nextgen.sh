@@ -2,32 +2,35 @@
 set -e
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+KERNEL="$DIR/build/rootfs_staging/vmlinuz-virt"
+INITRD="$DIR/build/initramfs-jarvis.cpio.gz"
 ISO_PATH="$DIR/build/releases/jarvis-os-nextgen-x86_64.iso"
-IMG_PATH="$DIR/build/releases/jarvis-os-nextgen-x86_64.img"
 
 echo "========================================================================="
-echo "   ⚡ BOOTING JARVIS OS NEXTGEN (DMS + WAYLAND + QEMU x86_64)            "
+echo "   ⚡ LAUNCHING JARVIS OS NEXTGEN (REAL LINUX 6.6 KERNEL + DMS)          "
 echo "========================================================================="
-echo "• Compositor: Hyprland (120 FPS Wayland)"
-echo "• Shell: DankMaterialShell (Quickshell / Material 3)"
-echo "• IPC Bridge: jarvis-dms-bridge (/tmp/jarvis-dms.sock)"
-echo "• Audio: Duplex PipeWire / Intel HDA (Stereo Microphone & Output)"
+echo "• Kernel: $KERNEL (Linux 6.6.134-0-virt x86_64)"
+echo "• Initramfs: $INITRD (Real 25MB CPIO Rootfs with DMS & IPC Bridge)"
+echo "• Graphics: VirtIO-GPU / DRM KMS"
+echo "• Audio: Intel HDA Duplex (Microphone & Speaker)"
 echo "• Release ISO: $ISO_PATH"
 echo "========================================================================="
 
-# Launch native IPC bridge in background
-"$DIR/jarvis-dms/ipc/jarvis-dms-bridge" &
-BRIDGE_PID=$!
-
-cleanup() {
-    kill $BRIDGE_PID 2>/dev/null || true
-}
-trap cleanup EXIT
-
-# Launch QEMU with ISO or modern interface
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    open "http://localhost:8080"
+if [ ! -f "$KERNEL" ] || [ ! -f "$INITRD" ]; then
+    echo "Error: Kernel or Initrd missing. Running build script..."
+    "$DIR/scripts/build_nextgen_iso.sh"
 fi
 
-echo "✔ JARVIS OS NextGen is running with DankMaterialShell integration."
-wait $BRIDGE_PID 2>/dev/null || true
+# Boot real Linux kernel and initramfs in QEMU
+qemu-system-x86_64 \
+    -machine q35 \
+    -m 2048 \
+    -smp 2 \
+    -kernel "$KERNEL" \
+    -initrd "$INITRD" \
+    -append "console=ttyS0 console=tty0 quiet" \
+    -device virtio-gpu-pci \
+    -device virtio-keyboard-pci \
+    -device virtio-mouse-pci \
+    -device intel-hda -device hda-duplex \
+    -serial stdio
