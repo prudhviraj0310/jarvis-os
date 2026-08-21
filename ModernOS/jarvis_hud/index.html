@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS OS — Holographic Personal Intelligence Command Center</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Ambient Particle Grid -->
+    <canvas id="cyber_grid_canvas"></canvas>
+
+    <div class="hud-container">
+        <!-- Top Tactical Header -->
+        <header class="tactical-header">
+            <div class="header-left">
+                <div class="arc-badge">⚡ JARVIS OS 1.0</div>
+                <div class="sub-badge">MIRA AGENT CORE · ACTIVE</div>
+                <div class="kernel-badge">LINUX 6.x · WAYLAND COMPOSITED</div>
+            </div>
+            <div class="header-center">
+                <div class="digital-clock" id="digital_clock">08:45:00 AM</div>
+                <div class="greeting-text" id="greeting_text">Good morning, Prudhvi Raj</div>
+            </div>
+            <div class="header-right">
+                <div class="stat-pill attendance-pill">
+                    <span class="label">ATTENDANCE</span>
+                    <span class="value" id="attendance_val">87.5%</span>
+                    <span class="badge safe">SAFE (+3 BUFFER)</span>
+                </div>
+                <div class="stat-pill shield-pill">
+                    <span class="label">SHIELD</span>
+                    <span class="value">100%</span>
+                    <span class="badge verified">LEDGER VERIFIED</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Command Grid -->
+        <main class="tactical-grid">
+            <!-- Left Navigation & Connectors Matrix -->
+            <aside class="left-panel glass-card">
+                <div class="panel-title"><span>⚡ NERVOUS CENTER</span> <span class="dot-live"></span></div>
+                
+                <div class="nav-buttons">
+                    <button class="nav-btn primary-btn" id="btn_browser" onclick="launchBrowser()">
+                        <span class="icon">🌐</span>
+                        <div class="btn-text">
+                            <span class="btn-main">Launch Web Browser</span>
+                            <span class="btn-sub">Chromium / Full GPU WebRTC</span>
+                        </div>
+                    </button>
+
+                    <button class="nav-btn" id="btn_mira" onclick="switchView('mira')">
+                        <span class="icon">🤖</span>
+                        <div class="btn-text">
+                            <span class="btn-main">MIRA Agent Engine</span>
+                            <span class="btn-sub">8 Channels · Model Router</span>
+                        </div>
+                    </button>
+
+                    <button class="nav-btn active" id="btn_briefing" onclick="switchView('briefing')">
+                        <span class="icon">🌅</span>
+                        <div class="btn-text">
+                            <span class="btn-main">Morning Briefing</span>
+                            <span class="btn-sub">Daily Context Synthesis</span>
+                        </div>
+                    </button>
+
+                    <button class="nav-btn" id="btn_whatsapp" onclick="switchView('whatsapp')">
+                        <span class="icon">💬</span>
+                        <div class="btn-text">
+                            <span class="btn-main">WhatsApp Intelligence</span>
+                            <span class="btn-sub">2 Actionable Messages</span>
+                        </div>
+                    </button>
+
+                    <button class="nav-btn" id="btn_email" onclick="switchView('email')">
+                        <span class="icon">📬</span>
+                        <div class="btn-text">
+                            <span class="btn-main">Inbox Matrix</span>
+                            <span class="btn-sub">3 Priority Deliverables</span>
+                        </div>
+                    </button>
+
+                    <button class="nav-btn" id="btn_calendar" onclick="switchView('calendar')">
+                        <span class="icon">📅</span>
+                        <div class="btn-text">
+                            <span class="btn-main">Calendar Agenda</span>
+                            <span class="btn-sub">Demo at 10:30 AM</span>
+                        </div>
+                    </button>
+
+                    <button class="nav-btn" id="btn_news" onclick="switchView('news')">
+                        <span class="icon">🌍</span>
+                        <div class="btn-text">
+                            <span class="btn-main">Clustered News</span>
+                            <span class="btn-sub">AI, Tech & India</span>
+                        </div>
+                    </button>
+
+                    <button class="nav-btn" id="btn_memory" onclick="switchView('memory')">
+                        <span class="icon">🧠</span>
+                        <div class="btn-text">
+                            <span class="btn-main">Memory Wiki</span>
+                            <span class="btn-sub">Knowledge Graph</span>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="quick-action-box">
+                    <button class="action-btn handle-it-btn" onclick="handleIt()">⚡ 'Handle It' (Propose Drafts)</button>
+                    <button class="action-btn confirm-btn" onclick="confirmAll()">✅ Confirm & Send All</button>
+                </div>
+            </aside>
+
+            <!-- Center Viewport & Vector Arc Reactor -->
+            <section class="center-panel">
+                <!-- Arc Reactor Visualizer Canvas -->
+                <div class="arc-reactor-card glass-card">
+                    <canvas id="arc_reactor_canvas" width="460" height="230"></canvas>
+                    <div class="arc-telemetry">
+                        <div class="core-status" id="core_status">CORE STATUS: NOMINAL (60 FPS)</div>
+                        <div class="voice-matrix-status" id="voice_status">VOICE MATRIX: DUPLEX READY</div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Intelligence Deck -->
+                <div class="intelligence-deck glass-card">
+                    <div class="deck-header">
+                        <span class="deck-title" id="deck_title">🌅 EXECUTIVE MORNING INTELLIGENCE BRIEFING</span>
+                        <div class="deck-actions">
+                            <button class="icon-chip" onclick="speakCurrentView()">🔊 Speak</button>
+                            <button class="icon-chip" onclick="refreshData()">🔄 Sync</button>
+                        </div>
+                    </div>
+                    
+                    <div class="deck-content" id="deck_content">
+                        <!-- Rendered by app.js -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Telemetry & Channels Matrix -->
+            <aside class="right-panel glass-card">
+                <div class="panel-title"><span>📡 MIRA MULTI-CHANNEL TELEMETRY</span> <span class="dot-active"></span></div>
+
+                <div class="telemetry-list">
+                    <div class="telem-row">
+                        <span class="ch-name">🌐 Web Engine</span>
+                        <span class="ch-val status-ok">Chromium / Wayland</span>
+                    </div>
+                    <div class="telem-row">
+                        <span class="ch-name">💬 WhatsApp Bridge</span>
+                        <span class="ch-val status-ok">CONNECTED (2 unread)</span>
+                    </div>
+                    <div class="telem-row">
+                        <span class="ch-name">📬 Gmail IMAP</span>
+                        <span class="ch-val status-ok">SYNCHRONIZED (3 priority)</span>
+                    </div>
+                    <div class="telem-row">
+                        <span class="ch-name">🧠 Model Router</span>
+                        <span class="ch-val status-purple">DUAL-TIER (<10ms edge)</span>
+                    </div>
+                    <div class="telem-row">
+                        <span class="ch-name">🤖 Companion Check-in</span>
+                        <span class="ch-val status-orange">3 ACTIONABLE ALERTS</span>
+                    </div>
+                    <div class="telem-row">
+                        <span class="ch-name">📚 Memory Wiki</span>
+                        <span class="ch-val status-blue">3 KNOWLEDGE ARTICLES</span>
+                    </div>
+                    <div class="telem-row">
+                        <span class="ch-name">🛡️ Machine Sovereignty</span>
+                        <span class="ch-val status-ok">POLICY GATE ACTIVE</span>
+                    </div>
+                    <div class="telem-row">
+                        <span class="ch-name">🎙️ Duplex PipeWire Mic</span>
+                        <span class="ch-val status-ok">44.1 kHz STEREO</span>
+                    </div>
+                </div>
+
+                <div class="companion-box">
+                    <div class="box-title">🚨 Proactive Deadline Alerts</div>
+                    <div class="alert-item high">
+                        <span class="urgency">[Urgency 9/10]</span> Capstone Architecture Docs due tomorrow at 5 PM.
+                    </div>
+                    <div class="alert-item med">
+                        <span class="urgency">[Urgency 8/10]</span> Rahul Sharma awaiting Capstone files reply.
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Bottom Voice Matrix & Cognitive Prompt -->
+        <footer class="tactical-footer glass-card">
+            <button class="voice-wake-btn" id="voice_wake_btn" onclick="toggleVoice()">
+                <span class="mic-icon">🎙️</span>
+                <span class="btn-label" id="mic_label">Wake JARVIS</span>
+            </button>
+
+            <div class="input-wrapper">
+                <input type="text" id="command_input" placeholder="Speak with microphone or type instructions (e.g., 'launch browser', 'handle it', 'morning briefing', 'whatsapp', 'email', 'confirm')..." onkeydown="handleInputKey(event)">
+                <button class="send-cmd-btn" onclick="submitCommand()">DISPATCH</button>
+            </div>
+
+            <div class="quick-chips">
+                <button class="chip" onclick="launchBrowser()">🌐 Browser</button>
+                <button class="chip" onclick="switchView('mira')">🤖 MIRA</button>
+                <button class="chip" onclick="switchView('briefing')">🌅 Brief</button>
+                <button class="chip" onclick="switchView('whatsapp')">💬 WhatsApp</button>
+                <button class="chip" onclick="switchView('email')">📬 Email</button>
+                <button class="chip" onclick="switchView('calendar')">📅 Agenda</button>
+                <button class="chip" onclick="handleIt()">⚡ Handle It</button>
+                <button class="chip" onclick="confirmAll()">✅ Confirm</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Confirmation Modal Dialog -->
+    <div class="modal-overlay" id="confirm_modal">
+        <div class="modal-card glass-card">
+            <div class="modal-header">
+                <span class="modal-icon">🛡️</span>
+                <span class="modal-title">MACHINE SOVEREIGNTY CONFIRMATION GATE</span>
+            </div>
+            <div class="modal-body" id="modal_body">
+                <!-- Injected dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+                <button class="modal-btn confirm" id="modal_confirm_btn" onclick="executeConfirmedAction()">Confirm & Execute</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+/*
+ * JARVIS OS 1.0 — WAYBAR GLASSMORPHIC CYBER HUD STYLING
+ */
+
+* {
+    border: none;
+    border-radius: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 0;
+}
+
+window#waybar {
+    background: rgba(10, 14, 26, 0.78);
+    border-bottom: 1px solid rgba(0, 243, 255, 0.35);
+    color: #e0f7fa;
+    backdrop-filter: blur(16px);
+}
+
+#custom-jarvis {
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.25), rgba(0, 102, 255, 0.35));
+    border: 1px solid rgba(0, 243, 255, 0.6);
+    border-radius: 20px;
+    padding: 2px 14px;
+    margin: 4px 6px;
+    color: #00f3ff;
+    font-weight: 700;
+    box-shadow: 0 0 12px rgba(0, 243, 255, 0.4);
+}
+
+#workspaces button {
+    padding: 0 8px;
+    background: transparent;
+    color: #90a4ae;
+    border-radius: 12px;
+    margin: 4px 2px;
+    transition: all 0.2s ease;
+}
+
+#workspaces button.active {
+    background: rgba(0, 243, 255, 0.2);
+    border: 1px solid rgba(0, 243, 255, 0.5);
+    color: #00f3ff;
+}
+
+#custom-attendance, #custom-shield, #custom-mira_companion, #custom-whatsapp, #custom-email, #custom-news, #clock, #cpu, #memory, #pulseaudio, #battery, #custom-power {
+    background: rgba(16, 24, 44, 0.65);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: 16px;
+    padding: 2px 12px;
+    margin: 4px 3px;
+    color: #e0f7fa;
+}
+
+#custom-attendance {
+    color: #00e676;
+    border-color: rgba(0, 230, 118, 0.4);
+}
+
+#custom-shield {
+    color: #00f3ff;
+    border-color: rgba(0, 243, 255, 0.4);
+}
+
+#custom-mira_companion {
+    background: linear-gradient(135deg, rgba(124, 77, 255, 0.25), rgba(0, 243, 255, 0.25));
+    border-color: rgba(124, 77, 255, 0.5);
+    color: #b388ff;
+}
+
+#custom-whatsapp {
+    color: #25d366;
+    border-color: rgba(37, 211, 102, 0.4);
+}
+
+#custom-email {
+    color: #ff9100;
+    border-color: rgba(255, 145, 0, 0.4);
+}
+
+#custom-news {
+    color: #00b0ff;
+    border-color: rgba(0, 176, 255, 0.4);
+}
+
+#clock {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+#custom-power {
+    color: #ff5252;
+    border-color: rgba(255, 82, 82, 0.4);
+    padding: 2px 10px;
+}

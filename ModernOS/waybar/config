@@ -1,0 +1,93 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 38,
+    "spacing": 8,
+    "modules-left": ["custom/jarvis", "hyprland/workspaces", "custom/attendance", "custom/shield"],
+    "modules-center": ["clock", "custom/mira_companion"],
+    "modules-right": ["custom/whatsapp", "custom/email", "custom/news", "pulseaudio", "cpu", "memory", "battery", "custom/power"],
+
+    "custom/jarvis": {
+        "format": "⚡ JARVIS OS",
+        "on-click": "/bin/jarvis-hud --toggle",
+        "tooltip": true,
+        "tooltip-format": "JARVIS Holographic Personal OS\nClick to toggle Command HUD"
+    },
+
+    "custom/attendance": {
+        "format": "📈 87.5%",
+        "tooltip": true,
+        "tooltip-format": "Academic Attendance: 87.5% (Safe Zone: +3 Buffer)"
+    },
+
+    "custom/shield": {
+        "format": "🛡️ 100%",
+        "tooltip": true,
+        "tooltip-format": "Sovereignty Shield: Cryptographic Ledger Active"
+    },
+
+    "custom/mira_companion": {
+        "format": "🤖 MIRA: 8 Channels Active",
+        "on-click": "/bin/jarvis-hud --mira",
+        "tooltip": true,
+        "tooltip-format": "MIRA Multi-Tasking Agent Engine\nModel Router: Dual-Tier Reasoning\nClick to open MIRA Dashboard"
+    },
+
+    "custom/whatsapp": {
+        "format": "💬 2",
+        "on-click": "/bin/jarvis-hud --whatsapp",
+        "tooltip": true,
+        "tooltip-format": "WhatsApp Intelligence:\n• Rahul Sharma: Send project tomorrow [ACT-WA-001]\n• Priya V.: Presentation prep at 2 PM"
+    },
+
+    "custom/email": {
+        "format": "📬 3",
+        "on-click": "/bin/jarvis-hud --email",
+        "tooltip": true,
+        "tooltip-format": "Inbox Intelligence:\n• Prof. Krishnamurthy: Capstone Submission (Deadline: Tomorrow 5 PM)\n• Academic Dean: Hall Ticket Clearance (Approved)"
+    },
+
+    "custom/news": {
+        "format": "🌍 AI & Tech",
+        "on-click": "/bin/jarvis-hud --news",
+        "tooltip": true,
+        "tooltip-format": "Top Intelligence News:\n• Autonomous Agentic Operating Systems Pioneer Real-Time Machine Verification\n• C++26 Reflection Contracts Finalized"
+    },
+
+    "clock": {
+        "format": "🕒 {:%I:%M %p  ·  %a, %b %d}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+
+    "cpu": {
+        "format": "CPU: {usage}%",
+        "tooltip": false
+    },
+
+    "memory": {
+        "format": "RAM: {}%",
+        "tooltip": false
+    },
+
+    "pulseaudio": {
+        "format": "🔊 {volume}% | 🎙️ {desc}",
+        "format-muted": "🔇 Muted",
+        "on-click": "pavucontrol"
+    },
+
+    "battery": {
+        "states": {
+            "good": 95,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-icons": ["🪫", "🔋"]
+    },
+
+    "custom/power": {
+        "format": "⏻",
+        "on-click": "wlogout || poweroff",
+        "tooltip": false
+    }
+}

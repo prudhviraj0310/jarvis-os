@@ -1,0 +1,39 @@
+/*
+ * JARVIS OS 1.0 — WOFI / ROFI CYBER COMMAND LAUNCHER
+ */
+
+window {
+    margin: 0px;
+    border: 2px solid #00f3ff;
+    border-radius: 16px;
+    background-color: rgba(10, 14, 26, 0.88);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    font-size: 15px;
+    box-shadow: 0 0 30px rgba(0, 243, 255, 0.4);
+}
+
+#input {
+    margin: 12px;
+    border: 1px solid rgba(0, 243, 255, 0.4);
+    border-radius: 12px;
+    color: #ffffff;
+    background-color: rgba(16, 24, 44, 0.9);
+    padding: 8px 14px;
+}
+
+#inner-box {
+    margin: 6px 12px 12px 12px;
+    background-color: transparent;
+}
+
+#entry {
+    padding: 8px 12px;
+    border-radius: 10px;
+    color: #e0f7fa;
+}
+
+#entry:selected {
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.3), rgba(0, 102, 255, 0.4));
+    border: 1px solid #00f3ff;
+    color: #ffffff;
+}
