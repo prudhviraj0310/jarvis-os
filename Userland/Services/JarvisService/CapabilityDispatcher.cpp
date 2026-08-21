@@ -8,6 +8,7 @@
 #include <AK/JsonObject.h>
 #include <AK/JsonValue.h>
 #include <AK/StringBuilder.h>
+#include <LibCore/DateTime.h>
 #include <LibCore/File.h>
 #include <LibCore/ProcessStatisticsReader.h>
 #include <LibCore/System.h>
@@ -27,7 +28,34 @@ String CapabilityDispatcher::process_voice_command(String const& voice_text, Str
     response.set("request_id", request_id.to_byte_string());
     response.set("voice_input", voice_text.to_byte_string());
 
-    if (text.contains("status"sv) || text.contains("health"sv) || text.contains("diagnostics"sv)) {
+    auto now = Core::DateTime::now();
+    int hour = now.hour();
+    ByteString greeting = (hour < 12) ? "Good morning, Sir." : ((hour < 17) ? "Good afternoon, Sir." : ((hour < 22) ? "Good evening, Sir." : "Good night, Sir."));
+
+    if (text.contains("morning"sv) || text.contains("briefing"sv) || text.contains("daily"sv)) {
+        response.set("status", "SUCCESS");
+        response.set("greeting", greeting);
+        response.set("voice_response", ByteString::formatted("{} Here is your morning intelligence briefing: You have 3 unread WhatsApp messages, 4 priority emails, daily readiness is at 96%, and global news telemetry is nominal.", greeting));
+        response.set("whatsapp_unread", 3);
+        response.set("email_unread", 4);
+        response.set("productivity_score", "96%");
+        response.set("battery_score", "98%");
+    } else if (text.contains("whatsapp"sv) || text.contains("message"sv) || text.contains("chat"sv)) {
+        response.set("status", "SUCCESS");
+        response.set("voice_response", "Reading your 3 unread WhatsApp messages: Alex confirmed kernel patch merge; Stark Security reported perimeter verified; Sarah updated AI voice model.");
+        response.set("whatsapp_count", 3);
+    } else if (text.contains("email"sv) || text.contains("mail"sv) || text.contains("inbox"sv)) {
+        response.set("status", "SUCCESS");
+        response.set("voice_response", "You have 4 priority emails: GitHub UI PR merged; Stark Sentinel reported cyber defenses 100%; Tech Radar published sovereign OS article; Cloud backup completed.");
+        response.set("email_count", 4);
+    } else if (text.contains("percentage"sv) || text.contains("score"sv) || text.contains("productivity"sv) || text.contains("battery"sv)) {
+        response.set("status", "SUCCESS");
+        response.set("voice_response", "Your overall readiness score is 96%, daily schedule progress is 88%, and system battery power is at 98% with optimal hardware efficiency.");
+        response.set("readiness_score", "96%");
+    } else if (text.contains("news"sv) || text.contains("headlines"sv) || text.contains("world"sv)) {
+        response.set("status", "SUCCESS");
+        response.set("voice_response", "Current News Telemetry: Autonomous AI operating systems surge; Zero-trust syscall kernels gain adoption; Next-gen quantum satellite network deployed.");
+    } else if (text.contains("status"sv) || text.contains("health"sv) || text.contains("diagnostics"sv)) {
         response.set("status", "SUCCESS");
         response.set("voice_response", "All primary systems are operating at peak efficiency, sir. Kernel integrity is verified, and defense shield is nominal.");
         response.set("shield_status", m_threat_level == 2 ? "LOCKDOWN" : (m_threat_level == 1 ? "ELEVATED" : "NOMINAL (100%)"));
@@ -64,7 +92,7 @@ String CapabilityDispatcher::process_voice_command(String const& voice_text, Str
         response.set("voice_response", "Lockdown released. System returned to standard defense posture.");
     } else if (text.contains("who are you"sv) || text.contains("identity"sv) || text.contains("hello"sv) || text.contains("jarvis"sv)) {
         response.set("status", "SUCCESS");
-        response.set("voice_response", "Good day, sir. I am J.A.R.V.I.S., your native operating system intelligence subsystem. How may I assist you?");
+        response.set("voice_response", ByteString::formatted("{}, sir. I am J.A.R.V.I.S., your native operating system intelligence subsystem. Ready for your instructions.", greeting));
     } else {
         return dispatch(voice_text, "{}"_string, request_id);
     }
@@ -94,7 +122,15 @@ String CapabilityDispatcher::dispatch(String const& capability_name, String cons
     response.set("request_id", request_id.to_byte_string());
     response.set("capability", capability_name.to_byte_string());
 
-    if (capability_name == "system.processes"sv) {
+    if (capability_name == "system.morning_briefing"sv) {
+        return process_voice_command("morning briefing"_string, request_id);
+    } else if (capability_name == "system.whatsapp"sv) {
+        return process_voice_command("whatsapp"_string, request_id);
+    } else if (capability_name == "system.email"sv) {
+        return process_voice_command("email"_string, request_id);
+    } else if (capability_name == "system.news"sv) {
+        return process_voice_command("news"_string, request_id);
+    } else if (capability_name == "system.processes"sv) {
         auto stats_or_error = Core::ProcessStatisticsReader::get_all();
         if (stats_or_error.is_error()) {
             response.set("error", "Failed to read process statistics");
@@ -132,6 +168,7 @@ String CapabilityDispatcher::get_system_health()
     health.set("services_active", true);
     health.set("dispatcher", "C++ Native");
     health.set("voice_engine", "ACTIVE");
+    health.set("morning_briefing", "READY");
     return String::from_byte_string(health.to_byte_string()).release_value_but_fixme_should_propagate_errors();
 }
 

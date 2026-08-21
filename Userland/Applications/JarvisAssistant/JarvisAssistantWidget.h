@@ -25,6 +25,7 @@ public:
 
     void execute_command_string(StringView command);
     void trigger_voice_interaction();
+    void render_morning_briefing();
 
 private:
     JarvisAssistantWidget() = default;
@@ -33,18 +34,22 @@ private:
     RefPtr<GUI::TextBox> m_capability_input;
     RefPtr<GUI::Button> m_execute_button;
     RefPtr<GUI::Button> m_voice_button;
-    RefPtr<GUI::Button> m_btn_diag;
+
+    RefPtr<GUI::Button> m_btn_briefing;
+    RefPtr<GUI::Button> m_btn_whatsapp;
+    RefPtr<GUI::Button> m_btn_email;
+    RefPtr<GUI::Button> m_btn_score;
+    RefPtr<GUI::Button> m_btn_news;
     RefPtr<GUI::Button> m_btn_shield;
     RefPtr<GUI::Button> m_btn_lockdown;
-    RefPtr<GUI::Button> m_btn_journal;
-    RefPtr<GUI::Button> m_btn_mem;
-    RefPtr<GUI::Button> m_btn_who;
+    RefPtr<GUI::Button> m_btn_diag;
 
-    RefPtr<GUI::Button> m_chip_status;
+    RefPtr<GUI::Button> m_chip_briefing;
+    RefPtr<GUI::Button> m_chip_whatsapp;
+    RefPtr<GUI::Button> m_chip_email;
+    RefPtr<GUI::Button> m_chip_score;
+    RefPtr<GUI::Button> m_chip_news;
     RefPtr<GUI::Button> m_chip_shield;
-    RefPtr<GUI::Button> m_chip_diag;
-    RefPtr<GUI::Button> m_chip_lockdown;
-    RefPtr<GUI::Button> m_chip_identity;
 
     RefPtr<GUI::TextEditor> m_output_editor;
     RefPtr<GUI::Label> m_status_label;

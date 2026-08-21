@@ -6,7 +6,7 @@
     }
 
     @GUI::GroupBox {
-        title: "⚡ JARVIS OS — HOLOGRAPHIC TACTICAL COMMAND MATRIX"
+        title: "⚡ JARVIS OS — HOLOGRAPHIC TACTICAL COMMAND MATRIX & MORNING INTELLIGENCE"
         preferred_height: 48
         layout: @GUI::HorizontalBoxLayout {
             margins: [8]
@@ -15,13 +15,13 @@
 
         @GUI::Label {
             name: "status_label"
-            text: "KERNEL: JARVIS OS 1.0 (64-bit) | CPU: ACTIVE | MEMORY: NOMINAL"
+            text: "KERNEL: JARVIS OS 1.0 | TIME: 08:00 AM | STATUS: ONLINE"
             text_alignment: "CenterLeft"
         }
 
         @GUI::Label {
             name: "shield_label"
-            text: "ULTIMATE SHIELD: ACTIVE (100%) | DEFCON: NOMINAL"
+            text: "ULTIMATE SHIELD: ACTIVE (100%) | READINESS: 96%"
             text_alignment: "CenterRight"
         }
     }
@@ -32,16 +32,36 @@
         }
 
         @GUI::GroupBox {
-            title: "Tactical Protocols"
+            title: "Daily Intelligence & Protocols"
             preferred_width: 220
             layout: @GUI::VerticalBoxLayout {
                 margins: [8]
-                spacing: 6
+                spacing: 5
             }
 
             @GUI::Button {
-                name: "btn_diag"
-                text: "⚡ System Diagnostics"
+                name: "btn_briefing"
+                text: "🌅 Morning Briefing"
+            }
+
+            @GUI::Button {
+                name: "btn_whatsapp"
+                text: "💬 WhatsApp (3 Unread)"
+            }
+
+            @GUI::Button {
+                name: "btn_email"
+                text: "📬 Priority Emails (4)"
+            }
+
+            @GUI::Button {
+                name: "btn_score"
+                text: "📊 Readiness Score (96%)"
+            }
+
+            @GUI::Button {
+                name: "btn_news"
+                text: "🌍 World & Tech News"
             }
 
             @GUI::Button {
@@ -55,18 +75,8 @@
             }
 
             @GUI::Button {
-                name: "btn_journal"
-                text: "📜 SHA-256 Crypto Log"
-            }
-
-            @GUI::Button {
-                name: "btn_mem"
-                text: "🔍 Kernel Memory Scan"
-            }
-
-            @GUI::Button {
-                name: "btn_who"
-                text: "🌐 JARVIS Identity"
+                name: "btn_diag"
+                text: "⚡ System Diagnostics"
             }
         }
 
@@ -83,42 +93,67 @@
             @GUI::Widget {
                 preferred_height: 30
                 layout: @GUI::HorizontalBoxLayout {
-                    spacing: 6
+                    spacing: 4
                 }
 
                 @GUI::Button {
-                    name: "chip_status"
-                    text: "📊 Status"
+                    name: "chip_briefing"
+                    text: "🌅 Briefing"
+                }
+
+                @GUI::Button {
+                    name: "chip_whatsapp"
+                    text: "💬 WhatsApp"
+                }
+
+                @GUI::Button {
+                    name: "chip_email"
+                    text: "📬 Emails"
+                }
+
+                @GUI::Button {
+                    name: "chip_score"
+                    text: "📈 96% Score"
+                }
+
+                @GUI::Button {
+                    name: "chip_news"
+                    text: "🌍 News"
                 }
 
                 @GUI::Button {
                     name: "chip_shield"
                     text: "🛡️ Shield"
                 }
-
-                @GUI::Button {
-                    name: "chip_diag"
-                    text: "⚡ Diag"
-                }
-
-                @GUI::Button {
-                    name: "chip_lockdown"
-                    text: "🔒 Lockdown"
-                }
-
-                @GUI::Button {
-                    name: "chip_identity"
-                    text: "🤖 Identity"
-                }
             }
         }
 
         @GUI::GroupBox {
-            title: "Defense & Threat Vectors"
+            title: "Personal Telemetry & Defense"
             preferred_width: 220
             layout: @GUI::VerticalBoxLayout {
                 margins: [8]
                 spacing: 4
+            }
+
+            @GUI::Label {
+                text: "Daily Readiness: 96% (Optimal)"
+                text_alignment: "CenterLeft"
+            }
+
+            @GUI::Label {
+                text: "Battery Power: 98% (Healthy)"
+                text_alignment: "CenterLeft"
+            }
+
+            @GUI::Label {
+                text: "WhatsApp Sync: CONNECTED"
+                text_alignment: "CenterLeft"
+            }
+
+            @GUI::Label {
+                text: "Email Feed: SYNCHRONIZED"
+                text_alignment: "CenterLeft"
             }
 
             @GUI::Label {
@@ -132,11 +167,6 @@
             }
 
             @GUI::Label {
-                text: "VFS Integrity: VERIFIED"
-                text_alignment: "CenterLeft"
-            }
-
-            @GUI::Label {
                 text: "Core Frequency: 60 FPS"
                 text_alignment: "CenterLeft"
             }
@@ -145,16 +175,11 @@
                 text: "Voice Matrix: ENGAGED"
                 text_alignment: "CenterLeft"
             }
-
-            @GUI::Label {
-                text: "IPC: /tmp/portal/jarvis"
-                text_alignment: "CenterLeft"
-            }
         }
     }
 
     @GUI::GroupBox {
-        title: "Neural Voice & Cognitive Command Console"
+        title: "Neural Voice & Cognitive Intelligence Command Console"
         preferred_height: 48
         layout: @GUI::HorizontalBoxLayout {
             margins: [8]
@@ -169,7 +194,7 @@
 
         @GUI::TextBox {
             name: "capability_input"
-            placeholder: "Speak or type command (status, shield, lockdown, diagnostics, memory, who are you)..."
+            placeholder: "Speak or type (morning briefing, whatsapp, email, percentage, news, shield, lockdown)..."
         }
 
         @GUI::Button {
@@ -180,7 +205,7 @@
     }
 
     @GUI::GroupBox {
-        title: "Holographic Neural & Cryptographic Execution Journal Log"
+        title: "Holographic Intelligence Briefing & Execution Journal Log"
         preferred_height: 180
         layout: @GUI::VerticalBoxLayout {
             margins: [8]
