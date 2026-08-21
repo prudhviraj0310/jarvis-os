@@ -19,6 +19,7 @@ ErrorOr<void> JarvisAssistantWidget::initialize()
     m_execute_button = find_descendant_of_type_named<GUI::Button>("execute_button");
     m_voice_button = find_descendant_of_type_named<GUI::Button>("voice_button");
 
+    m_btn_mira = find_descendant_of_type_named<GUI::Button>("btn_mira");
     m_btn_briefing = find_descendant_of_type_named<GUI::Button>("btn_briefing");
     m_btn_whatsapp = find_descendant_of_type_named<GUI::Button>("btn_whatsapp");
     m_btn_email = find_descendant_of_type_named<GUI::Button>("btn_email");
@@ -28,6 +29,7 @@ ErrorOr<void> JarvisAssistantWidget::initialize()
     m_btn_handle_it = find_descendant_of_type_named<GUI::Button>("btn_handle_it");
     m_btn_confirm_all = find_descendant_of_type_named<GUI::Button>("btn_confirm_all");
 
+    m_chip_mira = find_descendant_of_type_named<GUI::Button>("chip_mira");
     m_chip_briefing = find_descendant_of_type_named<GUI::Button>("chip_briefing");
     m_chip_whatsapp = find_descendant_of_type_named<GUI::Button>("chip_whatsapp");
     m_chip_email = find_descendant_of_type_named<GUI::Button>("chip_email");
@@ -72,6 +74,9 @@ ErrorOr<void> JarvisAssistantWidget::initialize()
     }
 
     // Sidebar Navigation Buttons
+    if (m_btn_mira) {
+        m_btn_mira->on_click = [this](auto) { execute_command_string("mira"sv); };
+    }
     if (m_btn_briefing) {
         m_btn_briefing->on_click = [this](auto) { execute_command_string("morning briefing"sv); };
     }
@@ -88,7 +93,7 @@ ErrorOr<void> JarvisAssistantWidget::initialize()
         m_btn_news->on_click = [this](auto) { execute_command_string("news"sv); };
     }
     if (m_btn_memory) {
-        m_btn_memory->on_click = [this](auto) { execute_command_string("memory"sv); };
+        m_btn_memory->on_click = [this](auto) { execute_command_string("wiki"sv); };
     }
     if (m_btn_handle_it) {
         m_btn_handle_it->on_click = [this](auto) { execute_command_string("handle it"sv); };
@@ -98,6 +103,9 @@ ErrorOr<void> JarvisAssistantWidget::initialize()
     }
 
     // Quick Command Chips
+    if (m_chip_mira) {
+        m_chip_mira->on_click = [this](auto) { execute_command_string("mira"sv); };
+    }
     if (m_chip_briefing) {
         m_chip_briefing->on_click = [this](auto) { execute_command_string("morning briefing"sv); };
     }
@@ -155,16 +163,16 @@ void JarvisAssistantWidget::render_morning_briefing()
 
     StringBuilder sb;
     sb.append("=========================================================================\n"sv);
-    sb.appendff("   JARVIS OS 1.0 — DEEP PERSONAL INTELLIGENCE BRIEFING\n");
+    sb.appendff("   JARVIS OS 1.0 — DEEP MIRA PERSONAL INTELLIGENCE BRIEFING\n");
     sb.append("=========================================================================\n"sv);
     sb.appendff("JARVIS: \"{}, {}.\n", greeting, user_name);
-    sb.append("         Your digital nervous system has organized your digital life:\n\n"sv);
+    sb.append("         MIRA Multi-Channel Agent Engine has synchronized your environment:\n\n"sv);
 
     sb.append("📅 [SCHEDULE & MEETINGS]: 2 meetings today\n"sv);
     sb.append("   • [10:30 AM] Operating Systems Capstone Review & Demo (Lab 402)\n"sv);
     sb.append("   • [02:00 PM] Distributed Systems Group Presentation Prep (Library Room 2)\n\n"sv);
 
-    sb.append("💬 [WHATSAPP INTELLIGENCE]: 2 conversations requiring attention\n"sv);
+    sb.append("💬 [WHATSAPP & CHANNELS]: 2 conversations requiring attention\n"sv);
     sb.append("   • Rahul Sharma (07:45 AM): \"Bro can you send me the project tomorrow?\"\n"sv);
     sb.append("     ↳ Action Item: Send Capstone Project Files [ACT-WA-001]\n"sv);
     sb.append("   • Priya V. (08:10 AM): \"Are we meeting in the library at 2 PM?\"\n"sv);
@@ -183,11 +191,11 @@ void JarvisAssistantWidget::render_morning_briefing()
     sb.append("   • [AI]: Autonomous Agentic Operating Systems Pioneer Real-Time Machine Verification.\n"sv);
     sb.append("   • [TECH]: ISO C++ Committee standardizes C++26 Reflection & Safety Contracts.\n\n"sv);
 
-    sb.append("⚡ [JARVIS RECOMMENDS]:\n"sv);
+    sb.append("⚡ [JARVIS & MIRA RECOMMENDATIONS]:\n"sv);
     sb.append("   1. Reply to Rahul Sharma: 'Yes, I\\'ll send it tomorrow.'\n"sv);
     sb.append("   2. Submit Capstone documentation to Prof. Krishnamurthy before tomorrow 5 PM.\n"sv);
     sb.append("-------------------------------------------------------------------------\n"sv);
-    sb.append("🎙️ Say 'handle it', 'draft reply to Rahul', or click '⚡ Handle It' to proceed.\n"sv);
+    sb.append("🎙️ Click '🤖 MIRA Agent Engine', '⚡ Handle It', or speak your instructions.\n"sv);
 
     m_output_editor->set_text(sb.to_byte_string());
 }
@@ -215,7 +223,7 @@ void JarvisAssistantWidget::trigger_voice_interaction()
 
     if (m_voice_active) {
         sb.append("\n🎙️ [NEURAL VOICE STREAM ENGAGED]: Audio matrix active at 44.1 kHz...\n"sv);
-        sb.append("JARVIS: \"I am listening, sir. Say 'handle it', 'whatsapp', 'email', 'calendar', 'news', or 'confirm'.\"\n"sv);
+        sb.append("JARVIS: \"I am listening, sir. Say 'mira', 'handle it', 'whatsapp', 'email', 'calendar', 'news', or 'confirm'.\"\n"sv);
     } else {
         sb.append("\n🎙️ [NEURAL VOICE STREAM]: Voice input channel returned to standby.\n"sv);
     }
@@ -247,7 +255,34 @@ void JarvisAssistantWidget::execute_command_string(StringView command_str)
     }
 
     // 2. Direct Cognitive Processing
-    if (cmd_lower.contains("morning"sv) || cmd_lower.contains("briefing"sv) || cmd_lower.contains("daily"sv)) {
+    if (cmd_lower.contains("mira"sv) || cmd_lower.contains("agent"sv)) {
+        log_builder.append(
+            "=========================================================================\n"
+            "   JARVIS OS — MIRA SELF-HOSTED AGENT ARCHITECTURE DASHBOARD             \n"
+            "=========================================================================\n"
+            "⚡ MIRA CORE ENGINE: ACTIVE (Multi-Tasking Intelligent Responsive Assistant)\n\n"
+            "📡 [MULTI-CHANNEL GATEWAY]: 8 Channels Monitored (WhatsApp, Email, Telegram, Signal, Discord, Slack, Matrix, WebPush)\n"
+            "   • [WhatsApp] Rahul Sharma: \"Bro can you send me the project tomorrow?\" (Intent: REQUEST_FILES)\n"
+            "   • [Email] Prof. Krishnamurthy: \"Submit architecture docs before 5 PM.\" (Intent: DEADLINE)\n"
+            "   • [Discord] #ai-agents: MIRA multi-channel agent framework integrated with native microkernel.\n\n"
+            "🧠 [MODEL ROUTER & REASONING AUTO-ROUTING]:\n"
+            "   • Fast Edge Tier: <10ms latency (Status queries, single-step tasks)\n"
+            "   • Deep Reasoning Tier: <50ms latency (Multi-step synthesis & planning)\n"
+            "   • Local Edge Fallback: CONFIRMED (Offline resilient)\n\n"
+            "🤖 [PROACTIVE COMPANION & AMBIENT CHECK-INS]:\n"
+            "   • [Urgency 9/10] Capstone Architecture Documentation due tomorrow at 5:00 PM.\n"
+            "   • [Urgency 8/10] Rahul Sharma awaiting confirmation regarding project files.\n"
+            "   • [Urgency 7/10] Capstone Demonstration scheduled for 10:30 AM in Lab 402.\n\n"
+            "📚 [MEMORY WIKI & KNOWLEDGE GRAPH]: 3 Articles Indexed\n"
+            "   • [Projects]: Capstone Project: JARVIS OS\n"
+            "   • [Education]: Academic Standing & Attendance (87.5%)\n"
+            "   • [Security Architecture]: Machine Sovereignty Invariant\n\n"
+            "🔌 [MCP HOST & SANDBOXED TOOLS]: 3 Native Tools Registered\n"
+            "   • mcp_jarvis_journal_audit: Query SHA-256 capability proofs\n"
+            "   • mcp_mira_channel_dispatch: Dispatch verified payloads\n"
+            "   • mcp_mira_wiki_query: Semantic knowledge lookup\n"sv
+        );
+    } else if (cmd_lower.contains("morning"sv) || cmd_lower.contains("briefing"sv) || cmd_lower.contains("daily"sv)) {
         if (m_arc_reactor)
             m_arc_reactor->set_threat_status("ONLINE"sv);
         render_morning_briefing();
@@ -331,16 +366,19 @@ void JarvisAssistantWidget::execute_command_string(StringView command_str)
             "🌍 [India] National Quantum Mission Advances Indigenous QPU Fabrication\n"
             "   Summary: Premier academic institutions commission 64-qubit quantum testbeds.\n"sv
         );
-    } else if (cmd_lower.contains("memory"sv) || cmd_lower.contains("knowledge"sv) || cmd_lower.contains("facts"sv)) {
+    } else if (cmd_lower.contains("wiki"sv) || cmd_lower.contains("memory"sv) || cmd_lower.contains("knowledge"sv)) {
         log_builder.append(
             "=========================================================================\n"
-            "   JARVIS OS — LOCAL PERSONAL MEMORY & PROVENANCE GRAPH\n"
+            "   JARVIS OS — MIRA LOCAL MEMORY WIKI & PROVENANCE GRAPH\n"
             "=========================================================================\n"
-            " • [INFERRED, confidence=0.88] Rahul communication style: User replies casually and directly.\n"
-            " • [OBSERVED] Faculty communication style: Communication with faculty is strictly formal.\n"
-            " • [OBSERVED] Database Assignment Deadline: Due tomorrow by 11:59 PM.\n"
-            " • [DERIVED] Capstone Project Review: Scheduled with faculty next Monday.\n\n"
-            "⚡ Invariant: Memory informs decision-making and drafting. Memory CANNOT grant execution authority.\n"sv
+            " • [Projects] Capstone Project: JARVIS OS\n"
+            "   Sovereign 64-bit OS with native C++ kernel and SHA-256 JournalService.\n\n"
+            " • [Education] Academic Standing & Attendance\n"
+            "   Attendance verified at 87.5% with all midterm clearances confirmed.\n\n"
+            " • [Security Architecture] Machine Sovereignty Invariant\n"
+            "   Model Output != Machine Evidence. Consequential actions require native confirmation.\n\n"
+            " • [INFERRED, confidence=0.88] Rahul communication style: Casual and direct.\n"
+            " • [OBSERVED] Database Assignment Deadline: Due tomorrow by 11:59 PM.\n"sv
         );
     } else if (cmd_lower.contains("percentage"sv) || cmd_lower.contains("score"sv) || cmd_lower.contains("attendance"sv)) {
         log_builder.append(
@@ -352,11 +390,11 @@ void JarvisAssistantWidget::execute_command_string(StringView command_str)
         if (m_arc_reactor)
             m_arc_reactor->set_threat_status("ONLINE"sv);
         log_builder.append(
-            "JARVIS: \"All personal intelligence connectors nominal, sir. Kernel preemptive core active at 60 FPS.\"\n"sv
+            "JARVIS: \"All personal intelligence connectors and MIRA agent engine nominal, sir. Kernel active at 60 FPS.\"\n"sv
         );
     } else {
         log_builder.appendff(
-            "JARVIS: \"Command '{}' processed and dispatched through PolicyGate to native engine, sir.\"\n",
+            "JARVIS: \"Command '{}' processed and dispatched through MIRA PolicyGate to native engine, sir.\"\n",
             command_str
         );
     }

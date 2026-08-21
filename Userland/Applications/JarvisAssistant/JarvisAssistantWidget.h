@@ -35,6 +35,7 @@ private:
     RefPtr<GUI::Button> m_execute_button;
     RefPtr<GUI::Button> m_voice_button;
 
+    RefPtr<GUI::Button> m_btn_mira;
     RefPtr<GUI::Button> m_btn_briefing;
     RefPtr<GUI::Button> m_btn_whatsapp;
     RefPtr<GUI::Button> m_btn_email;
@@ -44,6 +45,7 @@ private:
     RefPtr<GUI::Button> m_btn_handle_it;
     RefPtr<GUI::Button> m_btn_confirm_all;
 
+    RefPtr<GUI::Button> m_chip_mira;
     RefPtr<GUI::Button> m_chip_briefing;
     RefPtr<GUI::Button> m_chip_whatsapp;
     RefPtr<GUI::Button> m_chip_email;

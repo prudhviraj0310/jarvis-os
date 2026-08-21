@@ -17,6 +17,12 @@ set(SOURCES
     Connectors/NewsConnector.cpp
     Connectors/WhatsAppConnector.cpp
     ConnectionFromClient.cpp
+    MIRA/MIRAEngine.cpp
+    MIRA/MIRAGateway.cpp
+    MIRA/MIRAMCPHost.cpp
+    MIRA/MIRAMemoryWiki.cpp
+    MIRA/MIRAModelRouter.cpp
+    MIRA/MIRAProactiveCompanion.cpp
     Persona/PersonaModel.cpp
     PersonalContext/ContactGraph.cpp
     PersonalContext/ContextEngine.cpp

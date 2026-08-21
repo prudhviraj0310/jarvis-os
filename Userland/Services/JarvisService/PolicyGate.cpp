@@ -39,6 +39,13 @@ PolicyGate::PolicyGate()
     m_rules.set("filesystem.read"_string, PolicyTier::Allowed);
     m_rules.set("kernel.dmesg"_string, PolicyTier::Allowed);
 
+    // MIRA Subsystem capabilities
+    m_rules.set("mira.dashboard"_string, PolicyTier::Allowed);
+    m_rules.set("mira.gateway"_string, PolicyTier::Allowed);
+    m_rules.set("mira.wiki"_string, PolicyTier::Allowed);
+    m_rules.set("mira.companion"_string, PolicyTier::Allowed);
+    m_rules.set("mira.mcp"_string, PolicyTier::Allowed);
+
     // Consequential actions (Require explicit human confirmation!)
     m_rules.set("whatsapp.send"_string, PolicyTier::ConfirmRequired);
     m_rules.set("email.send"_string, PolicyTier::ConfirmRequired);

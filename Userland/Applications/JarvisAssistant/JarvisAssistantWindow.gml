@@ -6,7 +6,7 @@
     }
 
     @GUI::GroupBox {
-        title: "⚡ JARVIS OS 1.0 — DEEP PERSONAL INTELLIGENCE OPERATING SYSTEM"
+        title: "⚡ JARVIS OS 1.0 — MIRA DEEP SELF-HOSTED PERSONAL AGENT OPERATING SYSTEM"
         preferred_height: 48
         layout: @GUI::HorizontalBoxLayout {
             margins: [8]
@@ -15,7 +15,7 @@
 
         @GUI::Label {
             name: "status_label"
-            text: "KERNEL: JARVIS OS 1.0 | PERSONAL NERVOUS SYSTEM: ONLINE"
+            text: "KERNEL: JARVIS OS 1.0 | MIRA AGENT CORE: ACTIVE | SOVEREIGN ARCHITECTURE"
             text_alignment: "CenterLeft"
         }
 
@@ -32,11 +32,16 @@
         }
 
         @GUI::GroupBox {
-            title: "Personal Nervous Center"
+            title: "MIRA & Personal Nervous Center"
             preferred_width: 220
             layout: @GUI::VerticalBoxLayout {
                 margins: [8]
                 spacing: 5
+            }
+
+            @GUI::Button {
+                name: "btn_mira"
+                text: "🤖 MIRA Agent Engine"
             }
 
             @GUI::Button {
@@ -66,7 +71,7 @@
 
             @GUI::Button {
                 name: "btn_memory"
-                text: "🧠 Personal Memory Graph"
+                text: "🧠 Memory & Wiki Graph"
             }
 
             @GUI::Button {
@@ -94,6 +99,11 @@
                 preferred_height: 30
                 layout: @GUI::HorizontalBoxLayout {
                     spacing: 4
+                }
+
+                @GUI::Button {
+                    name: "chip_mira"
+                    text: "🤖 MIRA"
                 }
 
                 @GUI::Button {
@@ -134,7 +144,7 @@
         }
 
         @GUI::GroupBox {
-            title: "Digital Environment Telemetry"
+            title: "MIRA Multi-Channel Telemetry"
             preferred_width: 220
             layout: @GUI::VerticalBoxLayout {
                 margins: [8]
@@ -142,27 +152,27 @@
             }
 
             @GUI::Label {
-                text: "WhatsApp Sync: CONNECTED"
+                text: "MIRA Gateway: 8 CHANNELS"
                 text_alignment: "CenterLeft"
             }
 
             @GUI::Label {
-                text: "Email IMAP: ACTIVE (:993)"
+                text: "Model Router: DUAL-TIER"
                 text_alignment: "CenterLeft"
             }
 
             @GUI::Label {
-                text: "Calendar Feed: SYNCHRONIZED"
+                text: "Companion: ACTIVE CHECK-IN"
                 text_alignment: "CenterLeft"
             }
 
             @GUI::Label {
-                text: "News RSS: DEDUPLICATED"
+                text: "Memory Wiki: 3 ARTICLES"
                 text_alignment: "CenterLeft"
             }
 
             @GUI::Label {
-                text: "Personal Memory: 4 FACTS"
+                text: "MCP Host: 3 SANDBOXED TOOLS"
                 text_alignment: "CenterLeft"
             }
 
@@ -199,7 +209,7 @@
 
         @GUI::TextBox {
             name: "capability_input"
-            placeholder: "Speak or type (e.g., 'morning briefing', 'handle it', 'confirm', 'whatsapp', 'email', 'calendar', 'news')..."
+            placeholder: "Speak or type (e.g., 'mira', 'morning briefing', 'handle it', 'confirm', 'whatsapp', 'email')..."
         }
 
         @GUI::Button {

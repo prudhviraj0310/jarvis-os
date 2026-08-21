@@ -15,6 +15,12 @@
 #include "Connectors/CalendarConnector.h"
 #include "Connectors/NewsConnector.h"
 #include "Automation/AutomationEngine.h"
+#include "MIRA/MIRAEngine.h"
+#include "MIRA/MIRAGateway.h"
+#include "MIRA/MIRAMemoryWiki.h"
+#include "MIRA/MIRAModelRouter.h"
+#include "MIRA/MIRAProactiveCompanion.h"
+#include "MIRA/MIRAMCPHost.h"
 #include <AK/JsonObject.h>
 #include <AK/JsonValue.h>
 #include <AK/StringBuilder.h>
@@ -69,7 +75,10 @@ String CapabilityDispatcher::process_voice_command(String const& voice_text, Str
     auto& user = UserProfile::the();
     user.reload();
 
-    if (text.contains("morning"sv) || text.contains("briefing"sv) || text.contains("daily"sv)) {
+    if (text.contains("mira"sv) || text.contains("multi-channel"sv) || text.contains("agent"sv)) {
+        response.set("status", "SUCCESS");
+        response.set("voice_response", MIRAEngine::the().generate_mira_dashboard());
+    } else if (text.contains("morning"sv) || text.contains("briefing"sv) || text.contains("daily"sv)) {
         response.set("status", "SUCCESS");
         response.set("voice_response", context.generate_morning_briefing());
     } else if (text.contains("handle it"sv) || text.contains("proceed"sv) || text.contains("take action"sv)) {
@@ -144,9 +153,33 @@ String CapabilityDispatcher::process_voice_command(String const& voice_text, Str
             sb.appendff(" • {} {}: {}\n   (Source: {}, Channel: {})\n\n", m.provenance_string(), m.key, m.content, m.timestamp, m.source_channel);
         }
         response.set("voice_response", sb.to_byte_string());
+    } else if (text.contains("wiki"sv)) {
+        response.set("status", "SUCCESS");
+        StringBuilder sb;
+        sb.append("JARVIS OS — MIRA LOCAL WIKI & KNOWLEDGE GRAPH:\n"sv);
+        for (auto const& art : MIRAMemoryWiki::the().articles()) {
+            sb.appendff(" • [{}] {}\n   Content: {}\n\n", art.category, art.title, art.content);
+        }
+        response.set("voice_response", sb.to_byte_string());
+    } else if (text.contains("companion"sv) || text.contains("check-in"sv)) {
+        response.set("status", "SUCCESS");
+        StringBuilder sb;
+        sb.append("JARVIS OS — MIRA PROACTIVE COMPANION STATUS:\n"sv);
+        for (auto const& c : MIRAProactiveCompanion::the().check_ins()) {
+            sb.appendff(" • [Urgency {}] {}: {}\n", c.urgency, c.message, c.recommended_action);
+        }
+        response.set("voice_response", sb.to_byte_string());
+    } else if (text.contains("mcp"sv) || text.contains("tools"sv)) {
+        response.set("status", "SUCCESS");
+        StringBuilder sb;
+        sb.append("JARVIS OS — MIRA MCP HOST (MODEL CONTEXT PROTOCOL):\n"sv);
+        for (auto const& t : MIRAMCPHost::the().registered_tools()) {
+            sb.appendff(" • {}: {}\n", t.name, t.description);
+        }
+        response.set("voice_response", sb.to_byte_string());
     } else if (text.contains("status"sv) || text.contains("health"sv) || text.contains("diagnostics"sv)) {
         response.set("status", "SUCCESS");
-        response.set("voice_response", "All primary systems are operating at peak efficiency, sir. Kernel integrity is verified, and defense shield is nominal.");
+        response.set("voice_response", "All primary systems are operating at peak efficiency, sir. Kernel integrity is verified, MIRA engine is nominal, and defense shield is 100%.");
         response.set("shield_status", m_threat_level == 2 ? "LOCKDOWN" : (m_threat_level == 1 ? "ELEVATED" : "NOMINAL (100%)"));
     } else if (text.contains("shield"sv) || text.contains("defense"sv) || text.contains("guard"sv)) {
         response.set("status", "SUCCESS");
@@ -164,7 +197,7 @@ String CapabilityDispatcher::process_voice_command(String const& voice_text, Str
         response.set("voice_response", "Lockdown released. System returned to standard defense posture.");
     } else if (text.contains("who are you"sv) || text.contains("hello"sv) || text.contains("jarvis"sv)) {
         response.set("status", "SUCCESS");
-        response.set("voice_response", ByteString::formatted("Hello, {}. I am J.A.R.V.I.S., your sovereign operating system intelligence subsystem. Standing by for your instructions.", user.name()));
+        response.set("voice_response", ByteString::formatted("Hello, {}. I am J.A.R.V.I.S., integrated with the MIRA personal agent architecture. Standing by for your instructions.", user.name()));
     } else {
         return dispatch(voice_text, "{}"_string, request_id);
     }
@@ -194,7 +227,17 @@ String CapabilityDispatcher::dispatch(String const& capability_name, String cons
     response.set("request_id", request_id.to_byte_string());
     response.set("capability", capability_name.to_byte_string());
 
-    if (capability_name == "system.morning_briefing"sv) {
+    if (capability_name == "mira.dashboard"sv) {
+        return process_voice_command("mira"_string, request_id);
+    } else if (capability_name == "mira.gateway"sv) {
+        return process_voice_command("gateway"_string, request_id);
+    } else if (capability_name == "mira.wiki"sv) {
+        return process_voice_command("wiki"_string, request_id);
+    } else if (capability_name == "mira.companion"sv) {
+        return process_voice_command("companion"_string, request_id);
+    } else if (capability_name == "mira.mcp"sv) {
+        return process_voice_command("mcp"_string, request_id);
+    } else if (capability_name == "system.morning_briefing"sv) {
         return process_voice_command("morning briefing"_string, request_id);
     } else if (capability_name == "system.whatsapp"sv) {
         return process_voice_command("whatsapp"_string, request_id);
@@ -249,6 +292,7 @@ String CapabilityDispatcher::get_system_health()
     health.set("shield", "ACTIVE (100%)");
     health.set("services_active", true);
     health.set("dispatcher", "C++ Native");
+    health.set("mira_engine", "ACTIVE");
     health.set("personal_engine", "DEEP_INTELLIGENCE_ONLINE");
     health.set("journal_service", "ACTIVE_SHA256");
     return String::from_byte_string(health.to_byte_string()).release_value_but_fixme_should_propagate_errors();
