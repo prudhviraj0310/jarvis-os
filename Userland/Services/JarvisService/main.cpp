@@ -19,6 +19,7 @@ ErrorOr<int> serenity_main(Main::Arguments)
     TRY(Core::System::unveil("/sys/kernel", "r"));
     TRY(Core::System::unveil("/proc", "r"));
     TRY(Core::System::unveil("/tmp", "rwc"));
+    TRY(Core::System::unveil("/etc/jarvis", "r"));
     TRY(Core::System::unveil(nullptr, nullptr));
 
     return event_loop.exec();

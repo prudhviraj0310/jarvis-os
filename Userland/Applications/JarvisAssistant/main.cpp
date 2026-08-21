@@ -19,6 +19,7 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
     TRY(Core::System::pledge("stdio recvfd sendfd rpath unix"));
     TRY(Core::System::unveil("/res", "r"));
     TRY(Core::System::unveil("/tmp", "rwc"));
+    TRY(Core::System::unveil("/etc/jarvis", "r"));
     TRY(Core::System::unveil(nullptr, nullptr));
 
     auto app_icon = GUI::Icon::default_icon("app-terminal"sv);
