@@ -26,6 +26,7 @@ public:
     void render_morning_briefing();
     void trigger_voice_interaction();
     void execute_command_string(StringView command_str);
+    void launch_browser();
 
 private:
     JarvisAssistantWidget() = default;
@@ -35,6 +36,7 @@ private:
     RefPtr<GUI::Button> m_execute_button;
     RefPtr<GUI::Button> m_voice_button;
 
+    RefPtr<GUI::Button> m_btn_browser;
     RefPtr<GUI::Button> m_btn_mira;
     RefPtr<GUI::Button> m_btn_briefing;
     RefPtr<GUI::Button> m_btn_whatsapp;
@@ -45,12 +47,12 @@ private:
     RefPtr<GUI::Button> m_btn_handle_it;
     RefPtr<GUI::Button> m_btn_confirm_all;
 
+    RefPtr<GUI::Button> m_chip_browser;
     RefPtr<GUI::Button> m_chip_mira;
     RefPtr<GUI::Button> m_chip_briefing;
     RefPtr<GUI::Button> m_chip_whatsapp;
     RefPtr<GUI::Button> m_chip_email;
     RefPtr<GUI::Button> m_chip_calendar;
-    RefPtr<GUI::Button> m_chip_news;
     RefPtr<GUI::Button> m_chip_handle_it;
     RefPtr<GUI::Button> m_chip_confirm;
 

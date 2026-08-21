@@ -36,7 +36,12 @@
             preferred_width: 220
             layout: @GUI::VerticalBoxLayout {
                 margins: [8]
-                spacing: 5
+                spacing: 4
+            }
+
+            @GUI::Button {
+                name: "btn_browser"
+                text: "🌐 Launch Web Browser"
             }
 
             @GUI::Button {
@@ -102,6 +107,11 @@
                 }
 
                 @GUI::Button {
+                    name: "chip_browser"
+                    text: "🌐 Browser"
+                }
+
+                @GUI::Button {
                     name: "chip_mira"
                     text: "🤖 MIRA"
                 }
@@ -127,11 +137,6 @@
                 }
 
                 @GUI::Button {
-                    name: "chip_news"
-                    text: "🌍 News"
-                }
-
-                @GUI::Button {
                     name: "chip_handle_it"
                     text: "⚡ Handle It"
                 }
@@ -149,6 +154,11 @@
             layout: @GUI::VerticalBoxLayout {
                 margins: [8]
                 spacing: 4
+            }
+
+            @GUI::Label {
+                text: "Web Browser: STANDBY"
+                text_alignment: "CenterLeft"
             }
 
             @GUI::Label {
@@ -182,12 +192,7 @@
             }
 
             @GUI::Label {
-                text: "Machine Ledger: SHA-256"
-                text_alignment: "CenterLeft"
-            }
-
-            @GUI::Label {
-                text: "Voice Matrix: 44.1 kHz"
+                text: "Voice Matrix: 44.1 kHz DUPLEX"
                 text_alignment: "CenterLeft"
             }
         }
@@ -209,7 +214,7 @@
 
         @GUI::TextBox {
             name: "capability_input"
-            placeholder: "Speak or type (e.g., 'mira', 'morning briefing', 'handle it', 'confirm', 'whatsapp', 'email')..."
+            placeholder: "Speak or type (e.g., 'browser', 'mira', 'morning briefing', 'handle it', 'confirm', 'whatsapp', 'email')..."
         }
 
         @GUI::Button {

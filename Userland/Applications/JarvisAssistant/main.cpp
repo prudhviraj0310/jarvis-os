@@ -13,10 +13,11 @@
 
 ErrorOr<int> serenity_main(Main::Arguments arguments)
 {
-    TRY(Core::System::pledge("stdio recvfd sendfd rpath unix"));
+    TRY(Core::System::pledge("stdio recvfd sendfd proc exec rpath wpath cpath unix"));
     auto app = TRY(GUI::Application::create(arguments));
 
-    TRY(Core::System::pledge("stdio recvfd sendfd rpath unix"));
+    TRY(Core::System::pledge("stdio recvfd sendfd proc exec rpath wpath cpath unix"));
+    TRY(Core::System::unveil("/bin", "rx"));
     TRY(Core::System::unveil("/res", "r"));
     TRY(Core::System::unveil("/tmp", "rwc"));
     TRY(Core::System::unveil("/etc/jarvis", "r"));

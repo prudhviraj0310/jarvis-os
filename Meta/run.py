@@ -577,7 +577,7 @@ def set_up_audio_hardware(config: Configuration):
     if provided_audio_hardware == "ac97":
         config.audio_devices = ["ac97,audiodev=snd0"]
     elif provided_audio_hardware == "intelhda":
-        config.audio_devices = ["ich9-intel-hda", "hda-output,audiodev=snd0"]
+        config.audio_devices = ["ich9-intel-hda", "hda-duplex,audiodev=snd0"]
     else:
         raise RunError(f"Unknown audio hardware {provided_audio_hardware}. Supported values: ac97, intelhda")
 

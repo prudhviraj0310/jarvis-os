@@ -6,6 +6,7 @@
 #include "JarvisAssistantWidget.h"
 #include <LibCore/ConfigFile.h>
 #include <LibCore/DateTime.h>
+#include <LibCore/Process.h>
 #include <AK/StringBuilder.h>
 #include <AK/JsonObject.h>
 #include <AK/JsonValue.h>
@@ -19,6 +20,7 @@ ErrorOr<void> JarvisAssistantWidget::initialize()
     m_execute_button = find_descendant_of_type_named<GUI::Button>("execute_button");
     m_voice_button = find_descendant_of_type_named<GUI::Button>("voice_button");
 
+    m_btn_browser = find_descendant_of_type_named<GUI::Button>("btn_browser");
     m_btn_mira = find_descendant_of_type_named<GUI::Button>("btn_mira");
     m_btn_briefing = find_descendant_of_type_named<GUI::Button>("btn_briefing");
     m_btn_whatsapp = find_descendant_of_type_named<GUI::Button>("btn_whatsapp");
@@ -29,12 +31,12 @@ ErrorOr<void> JarvisAssistantWidget::initialize()
     m_btn_handle_it = find_descendant_of_type_named<GUI::Button>("btn_handle_it");
     m_btn_confirm_all = find_descendant_of_type_named<GUI::Button>("btn_confirm_all");
 
+    m_chip_browser = find_descendant_of_type_named<GUI::Button>("chip_browser");
     m_chip_mira = find_descendant_of_type_named<GUI::Button>("chip_mira");
     m_chip_briefing = find_descendant_of_type_named<GUI::Button>("chip_briefing");
     m_chip_whatsapp = find_descendant_of_type_named<GUI::Button>("chip_whatsapp");
     m_chip_email = find_descendant_of_type_named<GUI::Button>("chip_email");
     m_chip_calendar = find_descendant_of_type_named<GUI::Button>("chip_calendar");
-    m_chip_news = find_descendant_of_type_named<GUI::Button>("chip_news");
     m_chip_handle_it = find_descendant_of_type_named<GUI::Button>("chip_handle_it");
     m_chip_confirm = find_descendant_of_type_named<GUI::Button>("chip_confirm");
 
@@ -74,6 +76,9 @@ ErrorOr<void> JarvisAssistantWidget::initialize()
     }
 
     // Sidebar Navigation Buttons
+    if (m_btn_browser) {
+        m_btn_browser->on_click = [this](auto) { launch_browser(); };
+    }
     if (m_btn_mira) {
         m_btn_mira->on_click = [this](auto) { execute_command_string("mira"sv); };
     }
@@ -103,6 +108,9 @@ ErrorOr<void> JarvisAssistantWidget::initialize()
     }
 
     // Quick Command Chips
+    if (m_chip_browser) {
+        m_chip_browser->on_click = [this](auto) { launch_browser(); };
+    }
     if (m_chip_mira) {
         m_chip_mira->on_click = [this](auto) { execute_command_string("mira"sv); };
     }
@@ -118,9 +126,6 @@ ErrorOr<void> JarvisAssistantWidget::initialize()
     if (m_chip_calendar) {
         m_chip_calendar->on_click = [this](auto) { execute_command_string("calendar"sv); };
     }
-    if (m_chip_news) {
-        m_chip_news->on_click = [this](auto) { execute_command_string("news"sv); };
-    }
     if (m_chip_handle_it) {
         m_chip_handle_it->on_click = [this](auto) { execute_command_string("handle it"sv); };
     }
@@ -129,6 +134,30 @@ ErrorOr<void> JarvisAssistantWidget::initialize()
     }
 
     return {};
+}
+
+void JarvisAssistantWidget::launch_browser()
+{
+    if (m_arc_reactor)
+        m_arc_reactor->set_threat_status("ONLINE"sv);
+
+    auto result = Core::Process::spawn("/bin/Browser"sv, ReadonlySpan<StringView> {});
+    if (result.is_error()) {
+        if (m_output_editor) {
+            StringBuilder sb;
+            sb.append(m_output_editor->text());
+            sb.appendff("\n⚠️ [SYSTEM ERROR]: Failed to spawn /bin/Browser: {}\n", result.error());
+            m_output_editor->set_text(sb.to_byte_string());
+        }
+    } else {
+        if (m_output_editor) {
+            StringBuilder sb;
+            sb.append(m_output_editor->text());
+            sb.appendff("\n🌐 [WEB BROWSER LAUNCHED]: /bin/Browser process spawned with PID {}.\n", result.value());
+            sb.append("JARVIS: \"Launching native standards-compliant Web Browser (LibWeb / LibJS / LibTLS engine online)...\"\n"sv);
+            m_output_editor->set_text(sb.to_byte_string());
+        }
+    }
 }
 
 void JarvisAssistantWidget::render_morning_briefing()
@@ -168,6 +197,7 @@ void JarvisAssistantWidget::render_morning_briefing()
     sb.appendff("JARVIS: \"{}, {}.\n", greeting, user_name);
     sb.append("         MIRA Multi-Channel Agent Engine has synchronized your environment:\n\n"sv);
 
+    sb.append("🌐 [WEB BROWSER]: Native HTML/CSS/JS LibWeb Browser is ready (/bin/Browser)\n"sv);
     sb.append("📅 [SCHEDULE & MEETINGS]: 2 meetings today\n"sv);
     sb.append("   • [10:30 AM] Operating Systems Capstone Review & Demo (Lab 402)\n"sv);
     sb.append("   • [02:00 PM] Distributed Systems Group Presentation Prep (Library Room 2)\n\n"sv);
@@ -192,10 +222,11 @@ void JarvisAssistantWidget::render_morning_briefing()
     sb.append("   • [TECH]: ISO C++ Committee standardizes C++26 Reflection & Safety Contracts.\n\n"sv);
 
     sb.append("⚡ [JARVIS & MIRA RECOMMENDATIONS]:\n"sv);
-    sb.append("   1. Reply to Rahul Sharma: 'Yes, I\\'ll send it tomorrow.'\n"sv);
-    sb.append("   2. Submit Capstone documentation to Prof. Krishnamurthy before tomorrow 5 PM.\n"sv);
+    sb.append("   1. Click '🌐 Launch Web Browser' to browse the web.\n"sv);
+    sb.append("   2. Reply to Rahul Sharma: 'Yes, I\\'ll send it tomorrow.'\n"sv);
+    sb.append("   3. Submit Capstone documentation to Prof. Krishnamurthy before tomorrow 5 PM.\n"sv);
     sb.append("-------------------------------------------------------------------------\n"sv);
-    sb.append("🎙️ Click '🤖 MIRA Agent Engine', '⚡ Handle It', or speak your instructions.\n"sv);
+    sb.append("🎙️ Click '🌐 Launch Web Browser', '🤖 MIRA Agent Engine', '⚡ Handle It', or speak your instructions.\n"sv);
 
     m_output_editor->set_text(sb.to_byte_string());
 }
@@ -222,8 +253,8 @@ void JarvisAssistantWidget::trigger_voice_interaction()
     sb.append(m_output_editor->text());
 
     if (m_voice_active) {
-        sb.append("\n🎙️ [NEURAL VOICE STREAM ENGAGED]: Audio matrix active at 44.1 kHz...\n"sv);
-        sb.append("JARVIS: \"I am listening, sir. Say 'mira', 'handle it', 'whatsapp', 'email', 'calendar', 'news', or 'confirm'.\"\n"sv);
+        sb.append("\n🎙️ [NEURAL VOICE STREAM ENGAGED]: Duplex Audio active at 44.1 kHz (Microphone Input & Output)...\n"sv);
+        sb.append("JARVIS: \"I am listening, sir. Say 'open browser', 'mira', 'handle it', 'whatsapp', 'email', 'calendar', 'news', or 'confirm'.\"\n"sv);
     } else {
         sb.append("\n🎙️ [NEURAL VOICE STREAM]: Voice input channel returned to standby.\n"sv);
     }
@@ -241,6 +272,12 @@ void JarvisAssistantWidget::execute_command_string(StringView command_str)
     log_builder.appendff("\n>>> [COGNITIVE DISPATCH]: {}\n", command_str);
 
     auto cmd_lower = ByteString(command_str).to_lowercase();
+
+    // Direct Browser Launcher
+    if (cmd_lower.contains("browser"sv) || cmd_lower.contains("web"sv) || cmd_lower.contains("internet"sv)) {
+        launch_browser();
+        return;
+    }
 
     // 1. Attempt IPC synchronization with JarvisService daemon
     if (!m_connection) {
